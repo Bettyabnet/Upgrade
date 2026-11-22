@@ -1730,52 +1730,43 @@ function saveDistEdit() {
   if (!editingDistId) return;
   const dist = distributions.find(d => d.id === editingDistId);
   if (!dist) return;
-  
   const rolls = parseFloat(document.getElementById("edit-dist-rolls").value);
   const perRoll = parseFloat(document.getElementById("edit-dist-per-roll").value);
   const price = parseFloat(document.getElementById("edit-dist-price").value);
-  
-  if (!rolls || !perRoll || !price) {
-    showToast("⚠️ ትክክለኛ መረጃ ያስገቡ");
-    return;
-  }
-  
+  if (!rolls || !perRoll || !price) { showToast("⚠️ ትክክለኛ መረጃ ያስገቡ"); return; }
   const totalQty = rolls * perRoll;
   const totalAmount = totalQty * price;
-  
+  const nextItem=document.getElementById("edit-dist-item").value;
+  const nextUnit=document.getElementById("edit-dist-unit").value;
+  let linked=null;
+  if(dist.stockMoveId){
+    linked=stockMoves.find(m=>m.id===dist.stockMoveId);
+    if(linked && (nextItem!==dist.item || nextUnit!==dist.unit)){
+      showToast("This sale affects stock. To change its product or unit, delete it and enter it again so inventory stays accurate.");
+      return;
+    }
+    if(linked){
+      const before=getStockFor(linked.materialId,linked.unit);
+      if(totalQty>before.qty+Number(linked.qty)){showToast("Not enough stock to apply this edit");return;}
+    }
+  }
   dist.date = document.getElementById("edit-dist-date").value;
   dist.member = document.getElementById("edit-dist-member").value;
-  dist.item = document.getElementById("edit-dist-item").value;
-  dist.unit = document.getElementById("edit-dist-unit").value;
+  dist.item = nextItem;
+  dist.unit = nextUnit;
   dist.rolls = rolls;
   dist.perRoll = perRoll;
   dist.price = price;
   dist.totalQty = totalQty;
   dist.totalAmount = totalAmount;
   dist.notes = document.getElementById("edit-dist-notes").value;
-  if(dist.stockMoveId){
-    const linked=stockMoves.find(m=>m.id===dist.stockMoveId);
-    if(linked){
-      const material=materials.find(m=>String(m.id)===String(linked.materialId));
-      const before=getStockFor(linked.materialId,linked.unit);
-      const availableExcludingOld=before.qty+Number(linked.qty);
-      if(linked.unit===dist.unit&&totalQty>availableExcludingOld){showToast("Not enough stock to apply this edit");return;}
-      linked.qty=totalQty;linked.unit=dist.unit;linked.date=dist.date;linked.item=dist.item;
-      if(material&&material.name!==dist.item){const matching=materials.find(m=>m.name===dist.item);if(matching)linked.materialId=matching.id;}
-      dist.unitCost=linked.unit===dist.unit?dist.unitCost:(getStockFor(linked.materialId,dist.unit).avgCost||0);
-      saveAdvancedData();
-    }
-  }
+  if(linked){linked.qty=totalQty;linked.date=dist.date;saveAdvancedData();}
   save();
   auditEvent("Distribution edited",dist.item+" · "+fmtFull(dist.totalAmount));
-  renderDistRecords();
-  renderDashboard();
-  renderStock();
-  renderReports();
+  renderDistRecords(); renderDashboard(); renderStock(); renderReports();
   closeDistModal();
   showToast("✅ ስርጭት ታዝቧል");
 }
-
 function closeDistModal() {
   document.getElementById("edit-dist-modal").classList.remove("active");
   editingDistId = null;

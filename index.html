@@ -1504,7 +1504,7 @@ function importBackup(input) {
       saveMaterials();
       renderDashboard();
       renderMaterials();
-      renderStock();
+      
       renderReports();
       renderAudit();
       showToast("✅ Backup ተጭኗል");
@@ -1529,7 +1529,7 @@ function clearAllData() {
   saveMaterials();
   renderDashboard();
   renderMaterials();
-  renderStock();
+  
   renderReports();
   auditEvent("All data cleared","Existing data reset by user");
   showToast("🗑️ ሁሉም ዳታ ተሰርዟል");
@@ -1854,7 +1854,7 @@ function deleteDist(id) {
     if(move){stockMoves=stockMoves.filter(m=>m.id!==move.id);stockMoves.unshift({id:Date.now(),materialId:move.materialId,item:move.item,type:"in",unit:move.unit,qty:move.qty,unitCost:0,date:getToday(),notes:"Reversal of deleted distribution "+id});saveAdvancedData();}
   }
   distributions = distributions.filter(d=>d.id!==id);
-  save(); auditEvent("Distribution deleted","Record "+id+"; linked stock movement reversed"); renderDistRecords(); renderDashboard(); renderStock(); showToast("🗑️ ተሰርዟል");
+  save(); auditEvent("Distribution deleted","Record "+id+"; linked stock movement reversed"); renderDistRecords(); renderDashboard();  showToast("🗑️ ተሰርዟል");
 }
 
 function deletePay(id) {
@@ -2090,7 +2090,7 @@ function recordStockMovement(){
   document.getElementById("stock-qty").value="";
   document.getElementById("stock-cost").value="";
   document.getElementById("stock-notes").value="";
-  renderStock();renderReports();showToast("Stock movement saved");
+  renderReports();showToast("Stock movement saved");
 }
 function saveAdvancedData(){
   try{localStorage.setItem(STORAGE_KEY_STOCK,JSON.stringify(stockMoves));localStorage.setItem(STORAGE_KEY_AUDIT,JSON.stringify(auditHistory));}
@@ -2156,7 +2156,7 @@ document.getElementById("f-date").value = getToday();
 document.getElementById("p-date").value = getToday();
 renderDashboard();
 renderMaterials();
-renderStock();
+
 renderReports();
 renderAudit();
 if(document.getElementById("stock-date"))document.getElementById("stock-date").value=getToday();

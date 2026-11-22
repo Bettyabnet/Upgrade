@@ -831,9 +831,11 @@ input:focus, select:focus, .form-input:focus { border-color: var(--ui-primary) !
     <div class="form-card-title">➕ አዲስ ጨርቅ ጨምር</div>
     <div class="add-material-form">
       <input type="text" id="m-name" placeholder="ጨርቅ ስም" class="form-input">
-      <input type="number" id="m-price" placeholder="ዋጋ (ብር)" class="form-input">
+      <input type="number" id="m-price" placeholder="ዋጋ (ብር)" min="0" step="0.01" class="form-input">
       <button class="btn-primary" onclick="addMaterial()">✅ ጨምር</button>
     </div>
+    <p class="form-hint">የጨርቅ ስምና ዋጋ እዚህ ያስገቡ። ዋጋውን በኋላ Edit በመጫን ማዘመን ይችላሉ።</p>
+    <button class="btn-sm btn-delete" style="margin-top:10px" onclick="clearAllMaterials()">🗑️ ሁሉንም ጨርቅና ዋጋ አጥፋ</button>
   </div>
 
   </div>
@@ -1208,10 +1210,7 @@ function loadData() {
   stockMoves = readStoredArray(STORAGE_KEY_STOCK, "stock");
   auditHistory = readStoredArray(STORAGE_KEY_AUDIT, "history");
 
-  if (materials.length === 0) {
-    materials = JSON.parse(JSON.stringify(DEFAULT_MATERIALS));
-    saveMaterials();
-  }
+  // An intentionally empty textile list must stay empty; do not restore sample defaults.
   updateMaterialSelect();
 }
 
@@ -1351,11 +1350,28 @@ function removeIncomingMaterial(id) {
 }
 
 function deleteMaterial(id) {
-  if (!confirm("ይህን ጨርቅ ይሰርዙ?")) return;
-  materials = materials.filter(m => m.id !== id);
-  saveMaterials(); auditEvent("Product deleted","Product "+id);
+  const item = materials.find(m => String(m.id) === String(id));
+  if (!item) return;
+  if (!confirm("Delete " + item.name + " and its current price from the textile list? Past delivery records will remain unchanged.")) return;
+  materials = materials.filter(m => String(m.id) !== String(id));
+  saveMaterials();
+  auditEvent("Product deleted", item.name);
   renderMaterials();
-  showToast("🗑️ ጨርቅ ተሰርዟል");
+  showToast("🗑️ " + item.name + " deleted");
+}
+
+function clearAllMaterials() {
+  if (!materials.length) {
+    showToast("The textile list is already empty");
+    return;
+  }
+  if (!confirm("Delete ALL textile names and prices from the textile list? Past delivery and payment records will NOT be deleted.")) return;
+  const count = materials.length;
+  materials = [];
+  saveMaterials();
+  auditEvent("All textiles cleared", count + " textile items");
+  renderMaterials();
+  showToast("All textile names and prices cleared. You can now add new ones.");
 }
 
 function renderMaterials() {

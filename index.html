@@ -840,31 +840,6 @@ input:focus, select:focus, .form-input:focus { border-color: var(--ui-primary) !
 
   <div class="material-list" id="material-list"></div>
 
-  <div class="advanced-panel">
-    <div class="form-card-title">📦 Stock movement</div>
-    <div class="advanced-muted">Record new stock received or stock issued. Quantities are tracked by unit. Existing products start as “not tracked” until you enter an opening balance.</div>
-    <div class="form-group"><label>Fabric / product</label><select id="stock-material" class="form-input"></select></div>
-    <div class="form-grid-2">
-      <div class="form-group"><label>Movement</label><select id="stock-type" class="form-input"><option value="in">Stock in</option><option value="out">Stock out / adjustment</option></select></div>
-      <div class="form-group"><label>Unit</label><select id="stock-unit" class="form-input"><option>ሜትር</option><option>ኪግ</option><option>ፋርዳ</option><option>ቀንድ</option></select></div>
-    </div>
-    <div class="form-grid-2">
-      <div class="form-group"><label>Quantity</label><input id="stock-qty" type="number" min="0.01" step="0.01" placeholder="e.g. 250"></div>
-      <div class="form-group"><label>Cost per unit (ETB)</label><input id="stock-cost" type="number" min="0" step="0.01" placeholder="Purchase cost"></div>
-    </div>
-    <div class="form-group"><label>Date</label><input id="stock-date" type="date"></div>
-    <div class="form-group"><label>Supplier / reference / notes</label><input id="stock-notes" type="text" placeholder="Optional details"></div>
-    <button class="btn-primary" onclick="recordStockMovement()">Save stock movement</button>
-  </div>
-  <div class="advanced-panel">
-    <div class="form-card-title">Current stock</div>
-    <div id="stock-summary" class="advanced-grid"></div>
-    <div id="stock-list" class="advanced-table-wrap" style="margin-top:12px"></div>
-  </div>
-  <div class="advanced-panel">
-    <div class="form-card-title">Recent stock movements</div>
-    <div id="stock-history-list"></div>
-  </div>
 
 </div>
 
@@ -1283,7 +1258,7 @@ function editMaterial(id){
   const priceText=prompt("Selling price per unit (ETB)",String(mat.price));if(priceText===null)return;
   const price=Number(priceText);if(!Number.isFinite(price)||price<0){showToast("Enter a valid price");return;}
   mat.name=clean;mat.price=price;
-  saveMaterials();auditEvent("Product edited",clean+" · "+fmtFull(price));renderMaterials();renderStock();showToast("Product updated");
+  saveMaterials();auditEvent("Product edited",clean+" · "+fmtFull(price));renderMaterials();showToast("Product updated");
 }
 
 // ============ MATERIALS MANAGEMENT ============
@@ -1291,7 +1266,7 @@ function addMaterial() {
   const name = document.getElementById("m-name").value.trim();
   const price = parseFloat(document.getElementById("m-price").value);
   
-  if (!name || !price || price < 0) {
+  if (!name || !Number.isFinite(price) || price < 0) {
     showToast("⚠️ ጨርቅ ስም ና ትክክለኛ ዋጋ ያስገቡ");
     return;
   }
@@ -1379,7 +1354,7 @@ function deleteMaterial(id) {
   if (!confirm("ይህን ጨርቅ ይሰርዙ?")) return;
   materials = materials.filter(m => m.id !== id);
   saveMaterials(); auditEvent("Product deleted","Product "+id);
-  renderMaterials(); renderStock();
+  renderMaterials();
   showToast("🗑️ ጨርቅ ተሰርዟል");
 }
 
@@ -1431,12 +1406,14 @@ function renderMaterials() {
 
 function updateMaterialSelect() {
   const select = document.getElementById("f-item");
+  if (!select) return;
   const currentValue = select.value;
   
   select.innerHTML = '<option value="">— ጨርቅ ይምረጡ —</option>' +
     materials.map(m => `<option value="${m.id}">${m.name} (ብር${m.price})</option>`).join("");
   
-  select.value = currentValue;
+  select.value = currentValue && materials.some(m => String(m.id) === String(currentValue)) ? currentValue : "";
+  if (select.value) updatePrice();
 }
 
 function updatePrice() {
@@ -1598,7 +1575,6 @@ function showTab(id, btn) {
   if (id === "records")   { renderDistRecords(); renderPayRecords(); }
   if (id === "members")   renderMembers();
   if (id === "payment")   updatePayBalance();
-  if (id === "materials") { renderStock(); }
   if (id === "reports") renderReports();
   if (id === "history") renderAudit();
 }
@@ -1686,22 +1662,17 @@ function addDistribution() {
   
   const totalQty    = rolls * perRoll;
   const totalAmount = totalQty * price;
-  const stock = getStockFor(materialId,selectedUnit);
-  if(stock.tracked && totalQty>stock.qty){showToast("Not enough stock. Available: "+stock.qty+" "+selectedUnit);return;}
   const distributionId=Date.now();
-  const stockMoveId=Date.now()+1;
   distributions.unshift({
     id: distributionId,
-    stockMoveId: stock.tracked ? stockMoveId : null,
     date:   document.getElementById("f-date").value,
     member: document.getElementById("f-member").value,
     item: itemName, rolls, perRoll, price, totalQty, totalAmount,
     unit: selectedUnit,
-    unitCost: stock.tracked ? stock.avgCost : 0,
+    unitCost: 0,
     notes:  document.getElementById("f-notes").value.trim()
   });
   save();
-  if(stock.tracked){stockMoves.unshift({id:stockMoveId,materialId:Number(materialId),item:itemName,type:"out",unit:selectedUnit,qty:totalQty,unitCost:0,date:document.getElementById("f-date").value,notes:"Distribution "+distributionId+" to "+document.getElementById("f-member").value});saveAdvancedData();}
   auditEvent("Distribution added",itemName+" · "+totalQty+" "+selectedUnit+" · "+fmtFull(totalAmount));
   document.getElementById("f-item").value     = "";
   document.getElementById("f-rolls").value    = "";
@@ -1791,7 +1762,7 @@ function saveDistEdit() {
   if(linked){linked.qty=totalQty;linked.date=dist.date;saveAdvancedData();}
   save();
   auditEvent("Distribution edited",dist.item+" · "+fmtFull(dist.totalAmount));
-  renderDistRecords(); renderDashboard(); renderStock(); renderReports();
+  renderDistRecords(); renderDashboard(); renderReports();
   closeDistModal();
   showToast("✅ ስርጭት ታዝቧል");
 }

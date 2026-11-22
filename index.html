@@ -1494,6 +1494,7 @@ function importBackup(input) {
       stockMoves = Array.isArray(data.stockMoves)?data.stockMoves:[];
       auditHistory = Array.isArray(data.auditHistory)?data.auditHistory:[];
       auditEvent("Backup restored","Imported backup from "+(data.exportDate||"unknown date"));
+      saveAdvancedData();
       save();
       saveMaterials();
       renderDashboard();
@@ -2090,7 +2091,8 @@ function recordStockMovement(){
   const notes=document.getElementById("stock-notes").value.trim();
   if(!mat||!Number.isFinite(qty)||qty<=0){showToast("Enter a product and a quantity greater than zero");return;}
   const current=getStockFor(materialId,unit);
-  if(type==="out"&&current.tracked&&qty>current.qty){showToast("Not enough tracked stock for this movement");return;}
+  if(type==="out"&&!current.tracked){showToast("Enter an opening stock-in movement before issuing stock");return;}
+  if(type==="out"&&qty>current.qty){showToast("Not enough tracked stock for this movement");return;}
   if(type==="in"&&unitCost<0){showToast("Cost cannot be negative");return;}
   stockMoves.unshift({id:Date.now(),materialId:Number(materialId),item:mat.name,type,unit,qty,unitCost:type==="in"?unitCost:0,date,notes});
   saveAdvancedData();

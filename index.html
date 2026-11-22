@@ -1,0 +1,1782 @@
+<!DOCTYPE html>
+
+<html lang="am">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="ጨርቅ">
+<meta name="theme-color" content="#1C1200">
+<title>ጨርቅ አስተዳደር</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Ethiopic:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --gold:    #60A5FA;
+  --gold2:   #93C5FD;
+  --gold3:   #BFDBFE;
+  --goldDim: #3B82F6;
+  --bg:      #001A4D;
+  --bg2:     #003D82;
+  --bg3:     #1E3A8A;
+  --card:    #0F2847;
+  --border:  #3B82F640;
+  --border2: #60A5FA70;
+  --text:    #F0F9FF;
+  --text2:   #BFDBFE;
+  --text3:   #93C5FD;
+  --red:     #EF4444;
+  --green:   #22C55E;
+  --blue:    #60A5FA;
+  --shadow:  0 2px 16px rgba(59,130,246,0.15);
+  --shadow2: 0 4px 32px rgba(59,130,246,0.25);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+body {
+  background: var(--bg);
+  font-family: 'Noto Sans Ethiopic', 'Segoe UI', sans-serif;
+  color: var(--text);
+  max-width: 500px;
+  margin: 0 auto;
+  min-height: 100vh;
+  min-height: -webkit-fill-available;
+  background-image: radial-gradient(ellipse at top, #003D82 60%, #001A4D22 100%);
+}
+
+/* TOAST */
+#toast {
+position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+background: var(–text); color: var(–gold2);
+border-radius: 28px; padding: 16px 32px;
+z-index: 999; font-size: 20px; font-weight: 700;
+box-shadow: var(–shadow2); display: none; white-space: nowrap;
+border: 1.5px solid var(–gold);
+}
+
+/* HEADER */
+header {
+background: linear-gradient(135deg, #000B47 0%, #001A4D 60%, #003D82 100%);
+padding: 0 18px;
+display: flex; align-items: center; justify-content: space-between;
+position: sticky; top: 0; z-index: 20;
+box-shadow: 0 2px 20px rgba(59,130,246,0.2);
+min-height: 80px;
+padding-top: env(safe-area-inset-top);
+}
+.header-left { display: flex; align-items: center; gap: 14px; }
+.logo-wrap {
+width: 64px; height: 64px; border-radius: 16px;
+background: linear-gradient(135deg, #001F3F 0%, #003D82 50%, #004DA6 100%);
+display: flex; align-items: center; justify-content: center;
+font-size: 36px; box-shadow: 0 6px 20px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1);
+position: relative; overflow: hidden;
+}
+.header-title { font-size: 26px; font-weight: 900; color: white; letter-spacing: 0.3px; }
+.header-sub { font-size: 16px; color: #93C5FD; margin-top: 2px; }
+.header-right { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+.header-date {
+font-size: 15px; color: #BFDBFE;
+background: rgba(59,130,246,0.15);
+padding: 7px 15px; border-radius: 22px;
+border: 1px solid rgba(59,130,246,0.3);
+}
+.save-indicator {
+font-size: 14px; color: #93C5FD;
+display: flex; align-items: center; gap: 4px;
+}
+.save-dot {
+width: 8px; height: 8px; border-radius: 50%;
+background: #16A34A; display: inline-block;
+animation: pulse 2s infinite;
+}
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+/* NAV */
+nav {
+display: flex; background: #0F2847;
+border-bottom: 2px solid #60A5FA;
+position: sticky; top: 80px; z-index: 10;
+box-shadow: 0 2px 12px rgba(59,130,246,0.15);
+overflow-x: auto;
+}
+.nav-btn {
+flex: 1; background: none; border: none;
+border-bottom: 3px solid transparent;
+padding: 15px 2px 13px; cursor: pointer;
+color: #93C5FD; display: flex; flex-direction: column;
+align-items: center; gap: 4px; font-size: 26px;
+transition: all 0.18s; font-family: inherit;
+white-space: nowrap;
+min-width: 90px;
+}
+.nav-btn.active { color: #60A5FA; border-bottom: 3px solid #60A5FA; background: #1E3A8A; }
+.nav-label { font-size: 15px; font-weight: 700; letter-spacing: 0.2px; color: inherit; }
+
+/* MAIN */
+main { padding: 24px 16px 140px; }
+
+.section-title {
+font-size: 19px; font-weight: 900; color: var(–goldDim);
+text-transform: uppercase; letter-spacing: 1.5px;
+margin-bottom: 18px; margin-top: 14px;
+display: flex; align-items: center; gap: 8px;
+}
+.section-title::after { content:’’; flex:1; height:1px; background: var(–border2); }
+
+/* MATERIAL MANAGEMENT */
+.material-row {
+display: flex; align-items: center; gap: 14px;
+padding: 18px; background: var(–card);
+border: 1.5px solid var(–border2); border-radius: 14px;
+margin-bottom: 14px; box-shadow: var(–shadow);
+}
+.material-row.edit-mode {
+flex-wrap: wrap;
+}
+.material-info { flex: 1; }
+.material-name { font-size: 20px; font-weight: 800; color: var(–text); margin-bottom: 5px; }
+.material-price { font-size: 22px; font-weight: 900; color: var(–gold); }
+.material-unit { font-size: 15px; color: var(–text3); margin-top: 4px; }
+.material-status { font-size: 15px; padding: 5px 12px; border-radius: 20px; display: inline-block; margin-top: 6px; }
+.material-status.arriving { background: #dbeafe; color: #1e40af; }
+.material-status.available { background: #dcfce7; color: #15803d; }
+.material-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.material-inputs { display: flex; gap: 10px; width: 100%; flex-wrap: wrap; }
+.material-inputs input { flex: 1; min-width: 100px; }
+
+.btn-sm {
+padding: 13px 18px; border: none; border-radius: 10px;
+font-size: 16px; font-weight: 700; cursor: pointer;
+font-family: inherit; transition: all 0.15s;
+}
+.btn-edit { background: #2196F3; color: white; }
+.btn-edit:active { transform: scale(0.95); }
+.btn-delete { background: #f44336; color: white; }
+.btn-delete:active { transform: scale(0.95); }
+.btn-save { background: #4CAF50; color: white; }
+.btn-save:active { transform: scale(0.95); }
+.btn-cancel { background: #ff9800; color: white; }
+.btn-cancel:active { transform: scale(0.95); }
+
+.form-input {
+background: var(–bg2); border: 1.5px solid var(–border2);
+border-radius: 12px; padding: 15px 17px;
+color: var(–text); font-size: 18px; outline: none;
+font-family: inherit; transition: border 0.15s;
+}
+.form-input:focus { border-color: var(–gold); background: #fff; }
+
+.material-list { margin-bottom: 20px; }
+
+.add-material-form {
+display: flex; gap: 12px; margin-bottom: 20px;
+flex-wrap: wrap;
+}
+.add-material-form input {
+flex: 1;
+min-width: 120px;
+}
+.add-material-form .btn-primary {
+width: auto;
+padding: 15px 24px;
+font-size: 16px;
+margin: 0;
+}
+
+/* FORM */
+.form-card {
+background: var(–card); border-radius: 20px;
+padding: 22px; border: 1.5px solid var(–border2);
+box-shadow: var(–shadow); margin-bottom: 18px;
+}
+.form-card-title {
+font-size: 19px; font-weight: 800; color: var(–goldDim);
+margin-bottom: 20px; display: flex; align-items: center; gap: 9px;
+padding-bottom: 14px; border-bottom: 1px solid var(–border2);
+}
+.form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.form-group { margin-bottom: 18px; }
+.form-group:last-child { margin-bottom: 0; }
+label {
+display: block; font-size: 16px; color: var(–text3);
+font-weight: 800; margin-bottom: 8px;
+text-transform: uppercase; letter-spacing: 0.5px;
+}
+input, select {
+width: 100%; background: var(–bg2);
+border: 1.5px solid var(–border2); border-radius: 12px;
+padding: 16px 17px; color: var(–text); font-size: 18px;
+outline: none; font-family: inherit; transition: border 0.15s;
+}
+input:focus, select:focus { border-color: var(–gold); background: #fff; }
+select option { background: #fff; font-size: 16px; }
+.hint { font-size: 15px; color: var(–text3); margin-top: 5px; }
+
+/* CHIP SELECTOR */
+.chip-row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
+.chip {
+padding: 12px 20px; border-radius: 28px; font-size: 16px;
+font-weight: 700; cursor: pointer;
+border: 1.5px solid var(–border2);
+background: var(–bg2); color: var(–text2);
+transition: all 0.15s; font-family: inherit;
+}
+.chip.selected {
+background: linear-gradient(135deg, var(–gold), var(–gold2));
+border-color: var(–gold); color: #1C1200;
+box-shadow: 0 2px 8px rgba(240,180,41,0.35);
+}
+
+/* CALC BOX */
+.calc-box {
+background: linear-gradient(135deg, #1E3A8A, #003D82);
+border: 1.5px solid #60A5FA;
+border-radius: 14px; padding: 18px; margin-bottom: 18px;
+}
+.calc-title { font-size: 17px; color: var(–goldDim); font-weight: 800; margin-bottom: 13px; }
+.calc-row { display: flex; justify-content: space-between; font-size: 18px; margin-bottom: 8px; color: var(–text2); }
+.calc-row span:last-child { color: var(–text); font-weight: 700; }
+.calc-total {
+display: flex; justify-content: space-between;
+font-size: 20px; font-weight: 900;
+border-top: 1.5px solid var(–gold); padding-top: 13px; margin-top: 11px;
+}
+.calc-total span:last-child { color: var(–green); }
+
+/* BALANCE BOX */
+.balance-box {
+background: linear-gradient(135deg, #1E3A8A, #003D82);
+border: 1.5px solid #60A5FA; border-radius: 14px;
+padding: 18px; margin-bottom: 18px;
+}
+.balance-title { font-size: 17px; color: var(–goldDim); font-weight: 800; margin-bottom: 13px; }
+.balance-row { display: flex; justify-content: space-between; font-size: 17px; margin-bottom: 9px; color: var(–text2); }
+.balance-row span:last-child { font-weight: 700; }
+.balance-due {
+display: flex; justify-content: space-between;
+font-size: 20px; font-weight: 900;
+border-top: 1.5px solid var(–gold2); padding-top: 13px; margin-top: 11px;
+}
+
+/* BUTTONS */
+.btn-primary {
+width: 100%;
+background: linear-gradient(135deg, #1E40AF, #1E3A8A);
+border: none; border-radius: 14px; padding: 18px;
+color: #93C5FD; font-size: 19px; font-weight: 800;
+cursor: pointer; font-family: inherit;
+box-shadow: 0 4px 16px rgba(59,130,246,0.2);
+transition: transform 0.1s, box-shadow 0.1s;
+}
+.btn-primary:active { transform: scale(0.98); }
+.btn-success {
+width: 100%;
+background: linear-gradient(135deg, #16A34A, #22C55E);
+border: none; border-radius: 14px; padding: 18px;
+color: #fff; font-size: 19px; font-weight: 800;
+cursor: pointer; font-family: inherit;
+box-shadow: 0 4px 14px rgba(34,197,94,0.25);
+}
+
+/* BACKUP PANEL */
+.backup-panel {
+background: var(–card); border-radius: 18px;
+padding: 20px; border: 1.5px solid var(–border2);
+box-shadow: var(–shadow); margin-bottom: 24px;
+}
+.backup-title { font-size: 18px; font-weight: 800; color: var(–goldDim); margin-bottom: 16px; }
+.backup-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 13px; }
+.btn-backup {
+padding: 16px 13px; border-radius: 13px; font-size: 15px;
+font-weight: 800; cursor: pointer; font-family: inherit;
+border: 1.5px solid var(–border2); transition: all 0.15s;
+}
+.btn-backup-export {
+background: linear-gradient(135deg, #1E40AF, #1E3A8A);
+color: #93C5FD; border-color: #60A5FA;
+}
+.btn-backup-import {
+background: #003D82; color: #93C5FD;
+}
+.btn-backup-clear {
+background: #FEF2F2; color: var(–red); border-color: #FCA5A5;
+grid-column: 1/-1;
+}
+.data-stats {
+display: grid; grid-template-columns: 1fr 1fr 1fr;
+gap: 11px; margin-bottom: 16px;
+}
+.data-stat { background: var(–bg2); border-radius: 12px; padding: 14px; text-align: center; border: 1px solid var(–border); }
+.data-stat-lbl { font-size: 15px; color: var(–text3); font-weight: 700; text-transform: uppercase; }
+.data-stat-val { font-size: 24px; font-weight: 900; color: var(–text); margin-top: 5px; }
+
+/* SUMMARY CARDS */
+.card-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 24px; }
+.summary-card {
+border-radius: 18px; padding: 20px 18px;
+border: 1.5px solid var(–border2);
+box-shadow: var(–shadow);
+background: var(–card);
+position: relative; overflow: hidden;
+}
+.summary-card::before {
+content: ‘’; position: absolute; top: -18px; right: -18px;
+width: 60px; height: 60px; border-radius: 50%;
+background: rgba(125,211,252,0.10);
+}
+.card-icon { font-size: 32px; margin-bottom: 9px; }
+.card-label { font-size: 15px; color: var(–text3); margin-bottom: 7px; font-weight: 600; }
+.card-value { font-size: 24px; font-weight: 900; color: var(–text); }
+
+/* MEMBER BALANCE */
+.member-grid { display: flex; flex-direction: column; gap: 13px; margin-bottom: 24px; }
+.member-bal-card {
+background: var(–card); border-radius: 16px;
+padding: 17px 18px; border: 1.5px solid var(–border2);
+display: flex; align-items: center; gap: 16px;
+box-shadow: var(–shadow); transition: box-shadow 0.2s;
+}
+.avatar {
+width: 54px; height: 54px; border-radius: 14px;
+display: flex; align-items: center; justify-content: center;
+font-weight: 900; font-size: 24px; color: #fff; flex-shrink: 0;
+box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+.bal-info { flex: 1; min-width: 0; }
+.bal-name { font-weight: 800; font-size: 18px; color: var(–text); }
+.bal-sub { font-size: 15px; color: var(–text3); margin-top: 3px; }
+.progress-bar { margin-top: 7px; height: 6px; background: var(–bg3); border-radius: 3px; overflow: hidden; }
+.progress-fill { height: 100%; border-radius: 3px; transition: width 0.6s; }
+.bal-amount { text-align: right; flex-shrink: 0; }
+.bal-label { font-size: 13px; color: var(–text3); font-weight: 600; }
+.bal-val { font-size: 20px; font-weight: 900; }
+
+/* RECENT */
+.recent-row {
+display: flex; align-items: center; gap: 14px;
+padding: 15px 0; border-bottom: 1px solid var(–border);
+}
+.recent-info { flex: 1; min-width: 0; }
+.recent-name { font-size: 17px; font-weight: 700; color: var(–text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.recent-date { font-size: 15px; color: var(–text3); margin-top: 3px; }
+.recent-right { text-align: right; flex-shrink: 0; }
+
+/* FILTER */
+.filter-row { display: flex; gap: 10px; margin-bottom: 18px; }
+.filter-input {
+flex: 1; background: var(–card); border: 1.5px solid var(–border2);
+border-radius: 12px; padding: 14px 16px; color: var(–text);
+font-size: 17px; outline: none; font-family: inherit;
+}
+.clear-btn {
+background: var(–bg3); border: 1.5px solid var(–border2);
+border-radius: 12px; padding: 14px 18px; color: var(–text2);
+font-size: 16px; cursor: pointer; font-family: inherit; font-weight: 700;
+}
+
+/* TXN CARD */
+.txn-card {
+background: var(–card); border-radius: 16px;
+padding: 18px; border: 1.5px solid var(–border2);
+margin-bottom: 14px; box-shadow: var(–shadow);
+}
+.txn-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+.txn-tag {
+display: inline-block; padding: 4px 13px; border-radius: 14px;
+font-size: 14px; font-weight: 800; margin-left: 9px;
+background: var(–bg3); color: var(–goldDim);
+}
+.delete-btn { background: none; border: none; cursor: pointer; font-size: 22px; opacity: 0.45; padding: 4px; }
+.edit-btn { background: none; border: none; cursor: pointer; font-size: 20px; opacity: 0.6; padding: 4px; margin-right: 6px; }
+.info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin: 12px 0; }
+.info-box { background: var(–bg2); border-radius: 11px; padding: 14px 15px; border: 1px solid var(–border); }
+.info-lbl { font-size: 13px; color: var(–text3); margin-bottom: 4px; text-transform: uppercase; font-weight: 700; }
+.info-val { font-size: 17px; font-weight: 800; color: var(–text); }
+
+/* PAY CARD */
+.pay-card {
+background: var(–card); border-radius: 16px;
+padding: 18px; border: 1.5px solid var(–border2);
+margin-bottom: 14px; box-shadow: var(–shadow);
+}
+.pay-badge {
+padding: 6px 15px; border-radius: 24px; font-size: 14px;
+font-weight: 800; background: var(–bg3); color: var(–goldDim);
+border: 1px solid var(–border2);
+}
+
+/* SUB TABS */
+.sub-tabs { display: flex; gap: 9px; margin-bottom: 20px; }
+.sub-tab {
+flex: 1; padding: 15px; border-radius: 13px;
+border: 1.5px solid var(–border2); background: var(–bg2);
+color: var(–text2); font-size: 16px; font-weight: 800;
+cursor: pointer; text-align: center; font-family: inherit; transition: all 0.15s;
+}
+.sub-tab.active {
+background: linear-gradient(135deg, #1E40AF, #1E3A8A);
+border-color: #60A5FA; color: #93C5FD;
+}
+
+.empty { text-align: center; color: var(–text3); padding: 44px 0; font-size: 17px; }
+.tab { display: none; }
+.tab.active { display: block; }
+.red { color: var(–red); }
+.green { color: var(–green); }
+.blue { color: var(–blue); }
+.muted { color: var(–text3); }
+.count-lbl { font-size: 16px; color: var(–text3); margin-bottom: 14px; }
+.other-input { display: none; margin-top: 10px; }
+
+/* Install banner */
+#install-banner {
+display: none; position: fixed; bottom: 100px; left: 50%;
+transform: translateX(-50%); width: calc(100% - 28px); max-width: 472px;
+background: linear-gradient(135deg, #001A4D, #003D82);
+border: 1.5px solid #60A5FA; border-radius: 18px;
+padding: 18px 20px; z-index: 100;
+box-shadow: 0 8px 32px rgba(59,130,246,0.3);
+display: flex; align-items: center; gap: 16px;
+}
+#install-banner.hidden { display: none; }
+.install-text { flex: 1; font-size: 16px; color: #BFDBFE; font-weight: 600; line-height: 1.4; }
+.install-text strong { color: #93C5FD; font-size: 18px; display: block; margin-bottom: 3px; }
+.btn-install {
+background: #60A5FA; color: #001A4D; border: none;
+border-radius: 12px; padding: 14px 20px; font-size: 15px;
+font-weight: 900; cursor: pointer; font-family: inherit; white-space: nowrap;
+}
+.btn-dismiss {
+background: none; border: none; color: #93C5FD;
+font-size: 22px; cursor: pointer; padding: 0 4px;
+}
+
+/* INCOMING MATERIALS */
+.incoming-section {
+background: linear-gradient(135deg, #dbeafe, #e0e7ff);
+border: 1.5px solid #3b82f6;
+border-radius: 16px; padding: 18px;
+margin-bottom: 20px;
+}
+.incoming-title {
+font-size: 18px; font-weight: 800; color: #1e40af;
+margin-bottom: 16px; display: flex; align-items: center; gap: 9px;
+}
+.incoming-item {
+background: #fff; border-radius: 13px; padding: 16px;
+margin-bottom: 12px; border: 1.5px solid #bfdbfe;
+display: flex; justify-content: space-between; align-items: flex-start;
+}
+.incoming-item:last-child { margin-bottom: 0; }
+.incoming-info {
+flex: 1;
+}
+.incoming-name { font-size: 19px; font-weight: 800; color: var(–text); }
+.incoming-price { font-size: 18px; font-weight: 700; color: #1e40af; margin-top: 5px; }
+.incoming-unit { font-size: 15px; color: var(–text3); margin-top: 4px; }
+.incoming-date { font-size: 14px; color: var(–text3); margin-top: 4px; }
+.incoming-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.btn-confirm { background: #16a34a; color: white; padding: 11px 15px; border: none; border-radius: 9px; font-size: 15px; font-weight: 700; cursor: pointer; }
+.btn-confirm:active { transform: scale(0.95); }
+.btn-remove-incoming { background: #ef4444; color: white; padding: 11px 15px; border: none; border-radius: 9px; font-size: 15px; font-weight: 700; cursor: pointer; }
+.btn-remove-incoming:active { transform: scale(0.95); }
+.btn-edit-incoming { background: #3b82f6; color: white; padding: 11px 15px; border: none; border-radius: 9px; font-size: 15px; font-weight: 700; cursor: pointer; }
+.btn-edit-incoming:active { transform: scale(0.95); }
+
+/* MODAL */
+.modal-overlay {
+display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;
+}
+.modal-overlay.active { display: flex; }
+.modal {
+background: var(–card); border-radius: 20px; padding: 24px;
+max-width: 90%; max-height: 90vh; overflow-y: auto;
+width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+}
+.modal-title { font-size: 22px; font-weight: 900; color: var(–text); margin-bottom: 20px; }
+.modal-buttons { display: flex; gap: 12px; margin-top: 20px; }
+.modal-buttons button { flex: 1; padding: 16px; border: none; border-radius: 12px; font-size: 17px; font-weight: 700; cursor: pointer; }
+.modal-btn-save { background: #16a34a; color: white; }
+.modal-btn-cancel { background: #ef4444; color: white; }
+</style>
+
+</head>
+<body>
+
+<div id="toast"></div>
+
+<!-- Install Banner -->
+
+<div id="install-banner" class="hidden">
+  <div class="install-text">
+    <strong>📲 Home Screen ላይ ጨምር</strong>
+    ዳታ ሁልጊዜ ይቀመጣል
+  </div>
+  <button class="btn-dismiss" onclick="dismissBanner()">✕</button>
+</div>
+
+<!-- MODALS -->
+
+<div id="edit-dist-modal" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-title">📦 ስርጭት ቀይር</div>
+    <div class="form-group">
+      <label>ቀን</label>
+      <input type="date" id="edit-dist-date" class="form-input">
+    </div>
+    <div class="form-group">
+      <label>አባል</label>
+      <select id="edit-dist-member" class="form-input">
+        <option>Betty</option><option>Hulager</option><option>Gecho</option><option>Ashay</option><option>Marta</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>ጨርቅ</label>
+      <input type="text" id="edit-dist-item" class="form-input">
+    </div>
+    <div class="form-group">
+      <label>ክፍል</label>
+      <select id="edit-dist-unit" class="form-input">
+        <option>ሜትር</option><option>ኪግ</option><option>ቀንድ</option>
+      </select>
+    </div>
+    <div class="form-grid-2">
+      <div class="form-group">
+        <label>ሮሎች</label>
+        <input type="number" id="edit-dist-rolls" class="form-input">
+      </div>
+      <div class="form-group">
+        <label>በክፍል</label>
+        <input type="number" id="edit-dist-per-roll" class="form-input" step="0.01">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>ዋጋ/ክፍል (ብር)</label>
+      <input type="number" id="edit-dist-price" class="form-input" step="0.01">
+    </div>
+    <div class="form-group">
+      <label>ማስታወሻ</label>
+      <input type="text" id="edit-dist-notes" class="form-input">
+    </div>
+    <div class="modal-buttons">
+      <button class="modal-btn-save" onclick="saveDistEdit()">✅ ጠብቅ</button>
+      <button class="modal-btn-cancel" onclick="closeDistModal()">❌ ይቅር</button>
+    </div>
+  </div>
+</div>
+
+<div id="edit-pay-modal" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-title">💳 ክፍያ ቀይር</div>
+    <div class="form-group">
+      <label>ቀን</label>
+      <input type="date" id="edit-pay-date" class="form-input">
+    </div>
+    <div class="form-group">
+      <label>አባል</label>
+      <select id="edit-pay-member" class="form-input">
+        <option>Betty</option><option>Hulager</option><option>Gecho</option><option>Ashay</option><option>Marta</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>ኩባንያ</label>
+      <input type="text" id="edit-pay-company" class="form-input">
+    </div>
+    <div class="form-group">
+      <label>ዘዴ</label>
+      <input type="text" id="edit-pay-method" class="form-input">
+    </div>
+    <div class="form-group">
+      <label>መጠን (ብር)</label>
+      <input type="number" id="edit-pay-amount" class="form-input" step="0.01">
+    </div>
+    <div class="form-group">
+      <label>ማስታወሻ</label>
+      <input type="text" id="edit-pay-notes" class="form-input">
+    </div>
+    <div class="modal-buttons">
+      <button class="modal-btn-save" onclick="savePayEdit()">✅ ጠብቅ</button>
+      <button class="modal-btn-cancel" onclick="closePayModal()">❌ ይቅር</button>
+    </div>
+  </div>
+</div>
+
+<div id="edit-inc-modal" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-title">📥 ሊደርስ ይሆን ስርጭት ቀይር</div>
+    <div class="form-group">
+      <label>ጨርቅ ስም</label>
+      <input type="text" id="edit-inc-name" class="form-input">
+    </div>
+    <div class="form-group">
+      <label>ዋጋ (ብር)</label>
+      <input type="number" id="edit-inc-price" class="form-input" step="0.01">
+    </div>
+    <div class="form-group">
+      <label>ክፍል/ክፍሎች</label>
+      <div class="chip-row" id="edit-inc-unit-chips">
+        <div class="chip" onclick="selectEditIncUnit('ሜትር',this)">ሜትር</div>
+        <div class="chip" onclick="selectEditIncUnit('ኪግ',this)">ኪግ</div>
+        <div class="chip" onclick="selectEditIncUnit('ፉርዳ',this)">ፋርዳ</div>
+      </div>
+    </div>
+    <div class="modal-buttons">
+      <button class="modal-btn-save" onclick="saveIncEdit()">✅ ጠብቅ</button>
+      <button class="modal-btn-cancel" onclick="closeIncModal()">❌ ይቅር</button>
+    </div>
+  </div>
+</div>
+
+<header>
+  <div class="header-left">
+    <div class="logo-wrap">🧵</div>
+    <div>
+      <div class="header-title">የጨርቅ አስተዳደር</div>
+      <div class="header-sub">የስርጭት መዝገብ ስርዓት</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="header-date" id="headerDate"></div>
+    <div class="save-indicator"><span class="save-dot"></span><span id="save-status">ተቀምጧል</span></div>
+  </div>
+</header>
+
+<nav>
+  <button class="nav-btn active" onclick="showTab('dashboard',this)">
+    <span>📊</span><span class="nav-label">ዳሽቦርድ</span>
+  </button>
+  <button class="nav-btn" onclick="showTab('materials',this)">
+    <span>🧵</span><span class="nav-label">ጨርቅ</span>
+  </button>
+  <button class="nav-btn" onclick="showTab('add',this)">
+    <span>📦</span><span class="nav-label">ስርጭት</span>
+  </button>
+  <button class="nav-btn" onclick="showTab('payment',this)">
+    <span>💳</span><span class="nav-label">ክፍያ</span>
+  </button>
+  <button class="nav-btn" onclick="showTab('records',this)">
+    <span>📋</span><span class="nav-label">መዝገብ</span>
+  </button>
+  <button class="nav-btn" onclick="showTab('members',this)">
+    <span>👥</span><span class="nav-label">አባላት</span>
+  </button>
+</nav>
+
+<main>
+
+<!-- ========== MATERIALS ========== -->
+
+<div id="tab-materials" class="tab">
+  <div class="section-title">🧵 ጨርቅ ና ዋጋ</div>
+
+  <!-- Incoming Materials Section -->
+
+  <div class="form-card">
+    <div class="form-card-title">➕ አዲስ ጨርቅ ጨምር</div>
+    <div class="add-material-form">
+      <input type="text" id="m-name" placeholder="ጨርቅ ስም" class="form-input">
+      <input type="number" id="m-price" placeholder="ዋጋ (ብር)" class="form-input">
+      <button class="btn-primary" onclick="addMaterial()">✅ ጨምር</button>
+    </div>
+  </div>
+
+  </div>
+
+  <div class="material-list" id="material-list"></div>
+</div>
+
+<!-- ========== ዳሽቦርድ ========== -->
+
+<div id="tab-dashboard" class="tab active">
+  <div class="section-title">አጠቃላይ ሁኔታ</div>
+  <div class="card-row">
+    <div class="summary-card" style="border-top: 3px solid #F0B429;">
+      <div class="card-icon">📦</div>
+      <div class="card-label">ጠቅላላ ስርጭት</div>
+      <div class="card-value red" id="d-total">ብር 0</div>
+    </div>
+    <div class="summary-card" style="border-top: 3px solid #16A34A;">
+      <div class="card-icon">💰</div>
+      <div class="card-label">ጠቅላላ ክፍያ</div>
+      <div class="card-value green" id="d-paid">ብር 0</div>
+    </div>
+    <div class="summary-card" style="border-top: 3px solid #DC2626;">
+      <div class="card-icon">⚠️</div>
+      <div class="card-label">ቀሪ ዕዳ</div>
+      <div class="card-value red" id="d-outstanding">ብር 0</div>
+    </div>
+    <div class="summary-card" style="border-top: 3px solid #1D4ED8;">
+      <div class="card-icon">🔢</div>
+      <div class="card-label">የስርጭት ቁጥር</div>
+      <div class="card-value" id="d-count">0</div>
+    </div>
+  </div>
+
+  <div class="section-title">ማህደር</div>
+  <div class="backup-panel">
+    <div class="data-stats">
+      <div class="data-stat">
+        <div class="data-stat-lbl">ስርጭቶች</div>
+        <div class="data-stat-val" id="stat-dists">0</div>
+      </div>
+      <div class="data-stat">
+        <div class="data-stat-lbl">ክፍያዎች</div>
+        <div class="data-stat-val" id="stat-pays">0</div>
+      </div>
+      <div class="data-stat">
+        <div class="data-stat-lbl">ጨርቅ</div>
+        <div class="data-stat-val" id="stat-materials">0</div>
+      </div>
+    </div>
+    <div class="backup-btns">
+      <button class="btn-backup btn-backup-export" onclick="exportBackup()">📁 Backup ወርድ</button>
+      <button class="btn-backup btn-backup-import" onclick="document.getElementById('import-file').click()">📂 Backup ጫን</button>
+      <input type="file" id="import-file" accept=".json" style="display:none" onchange="importBackup(this)">
+      <button class="btn-backup btn-backup-clear" onclick="clearAllData()">🗑️ ሰርዝ</button>
+    </div>
+  </div>
+
+  <div class="section-title">የአባላት ቀሪ ሂሳብ</div>
+  <div class="member-grid" id="d-member-grid"></div>
+
+  <div class="section-title">የቅርብ ጊዜ እንቅስቃሴ</div>
+  <div id="d-recent"></div>
+</div>
+
+<!-- ========== ስርጭት ========== -->
+
+<div id="tab-add" class="tab">
+  <div class="section-title">አዲስ ስርጭት መዝገብ</div>
+  <div class="form-card">
+    <div class="form-card-title">📋 መሠረታዊ መረጃ</div>
+    <div class="form-grid-2">
+      <div class="form-group">
+        <label>ቀን *</label>
+        <input type="date" id="f-date">
+      </div>
+      <div class="form-group">
+        <label>አባል *</label>
+        <select id="f-member">
+          <option>Betty</option><option>Hulager</option><option>Gecho</option><option>Ashay</option><option>Marta</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>የጨርቅ ዓይነት *</label>
+      <select id="f-item" onchange="updatePrice()" style="font-size: 18px;">
+        <option value="">— ጨርቅ ይምረጡ —</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="form-card">
+    <div class="form-card-title">📐 ክፍል ና መጠን</div>
+    <div class="form-group">
+      <label>ክፍል *</label>
+      <div class="chip-row" id="unit-chips">
+        <div class="chip selected" onclick="selectUnit('ሜትር',this)">ሜትር</div>
+        <div class="chip" onclick="selectUnit('ኪግ',this)">ኪግ</div>
+        <div class="chip" onclick="selectUnit('ፋርዳ',this)">ፉርዳ</div>
+      </div>
+    </div>
+
+```
+<div class="form-group">
+  <label>የክፍሎች ብዛት *</label>
+  <input type="number" id="f-rolls" placeholder="ለምሳሌ፡ 150" oninput="updateCalc()">
+  <div class="hint" id="hint-rolls">የተቀበሉት ክፍሎች</div>
+</div>
+<div class="form-grid-2">
+  <div class="form-group">
+    <label id="label-per-unit">በክፍል *</label>
+    <input type="number" id="f-per-roll" placeholder="ለምሳሌ፡ 22.85" step="0.01" oninput="updateCalc()">
+    <div class="hint" id="hint-per-unit">በአንድ ክፍል ያለ ሜትር</div>
+  </div>
+  <div class="form-group">
+    <label id="label-price">ዋጋ / <span id="unit-display">ሜትር</span> (ብር) *</label>
+    <input type="number" id="f-price" placeholder="ለምሳሌ፡ 260" step="0.01" oninput="updateCalc()">
+  </div>
+</div>
+
+<div class="calc-box" id="calc-box" style="display:none">
+  <div class="calc-title">🧮 ስሌት</div>
+  <div class="calc-row"><span id="calc-label-rolls">ሮሎች</span><span id="c-rolls">—</span></div>
+  <div class="calc-row"><span id="calc-label-per-roll">በክፍል</span><span id="c-per-roll">—</span></div>
+  <div class="calc-row"><span>ዋጋ / <span id="calc-unit-display">ሜትር</span></span><span id="c-price">—</span></div>
+  <div class="calc-row"><span id="calc-label-qty">ጠቅላላ መጠን</span><span id="c-qty">—</span></div>
+  <div class="calc-total"><span>ጠቅላላ ዋጋ</span><span id="c-total">—</span></div>
+</div>
+
+<div class="form-group">
+  <label>ማስታወሻ (አስፈላጊ ከሆነ)</label>
+  <input type="text" id="f-notes" placeholder="ተጨማሪ ማስታወሳ...">
+</div>
+<button class="btn-primary" onclick="addDistribution()">📦 ስርጭት መዝግብ</button>
+```
+
+  </div>
+</div>
+
+<!-- ========== ክፍያ ========== -->
+
+<div id="tab-payment" class="tab">
+  <div class="section-title">ክፍያ መዝገብ</div>
+  <div class="form-card">
+    <div class="form-card-title">💳 የክፍያ መረጃ</div>
+    <div class="form-grid-2">
+      <div class="form-group">
+        <label>ቀን *</label>
+        <input type="date" id="p-date">
+      </div>
+      <div class="form-group">
+        <label>አባል *</label>
+        <select id="p-member" onchange="updatePayBalance()">
+          <option>Betty</option><option>Hulager</option><option>Gecho</option><option>Ashay</option><option>Marta</option>
+        </select>
+      </div>
+    </div>
+
+```
+<div class="form-group">
+  <label>ኩባንያ *</label>
+  <div class="chip-row" id="company-chips-pay">
+    <div class="chip selected" onclick="selectCompany('Freestyle',this)">Freestyle</div>
+    <div class="chip" onclick="selectCompany('Hanlin',this)">Hanlin</div>
+    <div class="chip" onclick="selectCompany('Hibo',this)">Hibo</div>
+    <div class="chip" onclick="selectCompany('New',this)">New</div>
+  </div>
+</div>
+
+<div class="form-group">
+  <label>የክፍያ ዘዴ *</label>
+  <div class="chip-row" id="method-chips">
+    <div class="chip selected" onclick="selectMethod('CBE',this)">CBE</div>
+    <div class="chip" onclick="selectMethod('BOA',this)">BOA</div>
+    <div class="chip" onclick="selectMethod('Awash',this)">Awash</div>
+    <div class="chip" onclick="selectMethod('ጥሬ ገንዘብ',this)">ጥሬ ገንዘብ</div>
+    <div class="chip" onclick="selectMethod('ሌላ',this)">ሌላ</div>
+  </div>
+  <input type="text" id="p-other-method" class="other-input form-input" placeholder="የክፍያ ዘዴ ይጻፉ...">
+</div>
+
+<div class="form-group">
+  <label>የተከፈለ መጠን (ብር) *</label>
+  <input type="number" id="p-amount" placeholder="ለምሳሌ፡ 800000" oninput="updatePayBalance()">
+</div>
+
+<div class="balance-box" id="pay-balance-box">
+  <div class="balance-title">📊 ከክፍያ በኋላ ያለ ሂሳብ</div>
+  <div class="balance-row"><span>አሁን ያለ ቀሪ ዕዳ</span><span class="red" id="pb-outstanding">—</span></div>
+  <div class="balance-row"><span>የሚከፈለው</span><span class="green" id="pb-paying">—</span></div>
+  <div class="balance-due">
+    <span>የሚቀረው</span>
+    <span id="pb-remaining" class="red">—</span>
+  </div>
+</div>
+
+<div class="form-group">
+  <label>ማጣቀሻ / ማስታወሻ</label>
+  <input type="text" id="p-notes" placeholder="ደረሰኝ ቁጥር፣ ማስታወሳ...">
+</div>
+<button class="btn-success" onclick="addPayment()">✅ ክፍያ መዝግብ</button>
+```
+
+  </div>
+</div>
+
+<!-- ========== መዝገብ ========== -->
+
+<div id="tab-records" class="tab">
+  <div class="section-title">ሁሉም መዝገቦች</div>
+  <div class="sub-tabs">
+    <div class="sub-tab active" onclick="showSubTab('dist',this)">📦 ስርጭቶች</div>
+    <div class="sub-tab" onclick="showSubTab('pays',this)">💳 ክፍያዎች</div>
+  </div>
+
+  <div id="sub-dist">
+    <div class="filter-row">
+      <select class="filter-input" id="rd-member" onchange="renderDistRecords()">
+        <option>ሁሉም</option><option>Betty</option><option>Hulager</option><option>Gecho</option><option>Ashay</option><option>Marta</option>
+      </select>
+      <input type="date" class="filter-input" id="rd-date" onchange="renderDistRecords()">
+      <button class="clear-btn" onclick="clearDistFilter()">አጽዳ</button>
+    </div>
+    <div class="count-lbl" id="rd-count"></div>
+    <div id="rd-list"></div>
+  </div>
+
+  <div id="sub-pays" style="display:none">
+    <div class="filter-row">
+      <select class="filter-input" id="rp-member" onchange="renderPayRecords()">
+        <option>ሁሉም</option><option>Betty</option><option>Hulager</option><option>Gecho</option><option>Ashay</option><option>Marta</option>
+      </select>
+      <input type="date" class="filter-input" id="rp-date" onchange="renderPayRecords()">
+      <button class="clear-btn" onclick="clearPayFilter()">አጽዳ</button>
+    </div>
+    <div class="count-lbl" id="rp-count"></div>
+    <div id="rp-list"></div>
+  </div>
+</div>
+
+<!-- ========== አባላት ========== -->
+
+<div id="tab-members" class="tab">
+  <div class="section-title">የአባላት ሂሳብ</div>
+  <div id="m-list"></div>
+</div>
+
+</main>
+
+<script>
+// ============ DATA ============
+const MEMBERS = ["Betty","Hulager","Gecho","Ashay","Marta"];
+const COLORS  = { Betty:"#C2185B", Hulager:"#1565C0", Gecho:"#00796B", Ashay:"#E65100", Marta:"#6A1B9A" };
+const STORAGE_KEY_DIST = "tt_dist_am";
+const STORAGE_KEY_PAYS = "tt_pays_am";
+const STORAGE_KEY_MATS = "tt_mats_am";
+const STORAGE_KEY_INC = "tt_inc_am";
+
+let distributions = [];
+let payments      = [];
+let materials     = [];
+let incoming      = [];
+let selectedCompany = "Freestyle";
+let selectedMethod  = "CBE";
+let selectedUnit    = "ሜትር";
+let selectedIncUnit = "ሜትር";
+let selectedEditIncUnit = "ሜትር";
+let editingDistId = null;
+let editingPayId = null;
+let editingIncId = null;
+
+// ============ DEFAULT MATERIALS ============
+const DEFAULT_MATERIALS = [
+  { id: 1, name: 'Lee Streach', price: 284 },
+  { id: 2, name: 'KT', price: 247 },
+  { id: 3, name: 'DxT Lemut', price: 240 },
+  { id: 4, name: 'LW', price: 255 },
+  { id: 5, name: 'LW Print', price: 270 },
+  { id: 6, name: 'DxT Print Free', price: 250 },
+  { id: 7, name: 'DxT Print Lee', price: 262 },
+  { id: 8, name: 'Double Face', price: 240 },
+  { id: 9, name: 'Double Face Print', price: 255 },
+  { id: 10, name: 'Square', price: 265 },
+  { id: 11, name: 'FM Print', price: 270 },
+];
+
+// ============ PERSISTENT STORAGE ============
+function loadData() {
+  try {
+    distributions = JSON.parse(localStorage.getItem(STORAGE_KEY_DIST) || "[]");
+    payments      = JSON.parse(localStorage.getItem(STORAGE_KEY_PAYS) || "[]");
+    materials     = JSON.parse(localStorage.getItem(STORAGE_KEY_MATS) || "[]");
+    incoming      = JSON.parse(localStorage.getItem(STORAGE_KEY_INC) || "[]");
+    
+    if (materials.length === 0) {
+      materials = JSON.parse(JSON.stringify(DEFAULT_MATERIALS));
+      saveMaterials();
+    }
+  } catch(e) {
+    distributions = [];
+    payments = [];
+    materials = JSON.parse(JSON.stringify(DEFAULT_MATERIALS));
+    incoming = [];
+    showToast("⚠️ ዳታ ማንበብ ተሳናል — ባዶ ጀምሯል");
+  }
+  updateMaterialSelect();
+}
+
+function save() {
+  try {
+    localStorage.setItem(STORAGE_KEY_DIST, JSON.stringify(distributions));
+    localStorage.setItem(STORAGE_KEY_PAYS, JSON.stringify(payments));
+    flashSaved();
+    updateDataStats();
+  } catch(e) {
+    showToast("❌ ማስቀመጥ አልተቻለም");
+  }
+}
+
+function saveMaterials() {
+  try {
+    localStorage.setItem(STORAGE_KEY_MATS, JSON.stringify(materials));
+    localStorage.setItem(STORAGE_KEY_INC, JSON.stringify(incoming));
+    updateMaterialSelect();
+    updateDataStats();
+    flashSaved();
+  } catch(e) {
+    showToast("❌ ጨርቅ ማስቀመጥ አልተቻለም");
+  }
+}
+
+function flashSaved() {
+  const el = document.getElementById("save-status");
+  el.textContent = "ተቀምጧል ✓";
+  setTimeout(() => el.textContent = "ተቀምጧል", 1500);
+}
+
+function updateDataStats() {
+  document.getElementById("stat-dists").textContent = distributions.length;
+  document.getElementById("stat-pays").textContent  = payments.length;
+  document.getElementById("stat-materials").textContent = materials.length;
+}
+
+// ============ MATERIALS MANAGEMENT ============
+function addMaterial() {
+  const name = document.getElementById("m-name").value.trim();
+  const price = parseFloat(document.getElementById("m-price").value);
+  
+  if (!name || !price || price < 0) {
+    showToast("⚠️ ጨርቅ ስም ና ትክክለኛ ዋጋ ያስገቡ");
+    return;
+  }
+  
+  materials.push({
+    id: Date.now(),
+    name: name,
+    price: price
+  });
+  
+  document.getElementById("m-name").value = "";
+  document.getElementById("m-price").value = "";
+  saveMaterials();
+  renderMaterials();
+  showToast("✅ ጨርቅ ታክሏል — " + name);
+}
+
+function addIncomingMaterial() {
+  const name = document.getElementById("inc-name").value.trim();
+  const price = parseFloat(document.getElementById("inc-price").value);
+  
+  if (!name || !price || price < 0) {
+    showToast("⚠️ ጨርቅ ስም ና ትክክለኛ ዋጋ ያስገቡ");
+    return;
+  }
+  
+  incoming.push({
+    id: Date.now(),
+    name: name,
+    price: price,
+    unit: selectedIncUnit,
+    date: getToday()
+  });
+  
+  document.getElementById("inc-name").value = "";
+  document.getElementById("inc-price").value = "";
+  saveMaterials();
+  renderMaterials();
+  showToast("📥 ሊደርስ የሚችል ጨርቅ ታክሏል — " + name);
+}
+
+function confirmIncomingMaterial(id) {
+  const item = incoming.find(i => i.id === id);
+  if (!item) return;
+  
+  materials.push({
+    id: Date.now(),
+    name: item.name,
+    price: item.price
+  });
+  
+  incoming = incoming.filter(i => i.id !== id);
+  saveMaterials();
+  renderMaterials();
+  showToast("✅ ጨርቅ ተገደበ — " + item.name);
+}
+
+function startEditIncoming(id) {
+  const item = incoming.find(i => i.id === id);
+  if (!item) return;
+  
+  editingIncId = id;
+  document.getElementById("edit-inc-name").value = item.name;
+  document.getElementById("edit-inc-price").value = item.price;
+  selectedEditIncUnit = item.unit;
+  
+  document.querySelectorAll("#edit-inc-unit-chips .chip").forEach(c => c.classList.remove("selected"));
+  document.querySelectorAll("#edit-inc-unit-chips .chip").forEach(c => {
+    if (c.textContent === item.unit) c.classList.add("selected");
+  });
+  
+  document.getElementById("edit-inc-modal").classList.add("active");
+}
+
+function removeIncomingMaterial(id) {
+  if (!confirm("ይህን ሊደርስ የሚችል ጨርቅ ይሰርዙ?")) return;
+  incoming = incoming.filter(i => i.id !== id);
+  saveMaterials();
+  renderMaterials();
+  showToast("🗑️ ተሰርዟል");
+}
+
+function deleteMaterial(id) {
+  if (!confirm("ይህን ጨርቅ ይሰርዙ?")) return;
+  materials = materials.filter(m => m.id !== id);
+  saveMaterials();
+  renderMaterials();
+  showToast("🗑️ ጨርቅ ተሰርዟል");
+}
+
+function renderMaterials() {
+  const list = document.getElementById("material-list");
+  
+  const incomingSection = document.getElementById("incoming-section");
+  const incomingList = document.getElementById("incoming-list");
+  
+  if (incoming.length > 0) {
+    incomingSection.style.display = "block";
+    incomingList.innerHTML = incoming.map(inc => `
+      <div class="incoming-item">
+        <div class="incoming-info">
+          <div class="incoming-name">${inc.name}</div>
+          <div class="incoming-price">ብር ${inc.price.toFixed(2)}</div>
+          <div class="incoming-unit">📏 ${inc.unit}</div>
+          <div class="incoming-date">ወስኖ: ${inc.date}</div>
+        </div>
+        <div class="incoming-actions">
+          <button class="btn-confirm" onclick="confirmIncomingMaterial(${inc.id})">✅ ገደብ</button>
+          <button class="btn-edit-incoming" onclick="startEditIncoming(${inc.id})">✏️ ቀይር</button>
+          <button class="btn-remove-incoming" onclick="removeIncomingMaterial(${inc.id})">❌ ሰርዝ</button>
+        </div>
+      </div>
+    `).join("");
+  } else {
+    incomingSection.style.display = "none";
+  }
+  
+  if (materials.length === 0) {
+    list.innerHTML = '<div class="empty">ምንም ጨርቅ የለም</div>';
+    return;
+  }
+  
+  list.innerHTML = materials.map(mat => `
+    <div class="material-row">
+      <div class="material-info">
+        <div class="material-name">${mat.name}</div>
+        <div class="material-price">ብር ${mat.price.toFixed(2)}</div>
+        <div class="material-status available">✅ አግኝ ይቻል</div>
+      </div>
+      <div class="material-actions">
+        <button class="btn-sm btn-delete" onclick="deleteMaterial(${mat.id})">🗑️ ሰርዝ</button>
+      </div>
+    </div>
+  `).join("");
+}
+
+function updateMaterialSelect() {
+  const select = document.getElementById("f-item");
+  const currentValue = select.value;
+  
+  select.innerHTML = '<option value="">— ጨርቅ ይምረጡ —</option>' +
+    materials.map(m => `<option value="${m.id}">${m.name} (ብር${m.price})</option>`).join("");
+  
+  select.value = currentValue;
+}
+
+function updatePrice() {
+  const materialId = document.getElementById("f-item").value;
+  if (!materialId) {
+    document.getElementById("f-price").value = "";
+    return;
+  }
+  
+  const mat = materials.find(m => m.id == materialId);
+  if (mat) {
+    document.getElementById("f-price").value = mat.price;
+    updateCalc();
+  }
+}
+
+// ============ UNIT SELECTION ============
+function selectUnit(val, el) {
+  selectedUnit = val;
+  document.querySelectorAll("#unit-chips .chip").forEach(c => c.classList.remove("selected"));
+  el.classList.add("selected");
+  
+  // Update labels and hints based on selected unit
+  updateUnitLabels();
+  updateCalc();
+}
+
+function updateUnitLabels() {
+  const unitDisplay = selectedUnit;
+  const unitLabel = selectedUnit === "ሜትር" ? "ሜትር" : selectedUnit === "ኪግ" ? "ኪግ" : "ቀንድ";
+  
+  document.getElementById("unit-display").textContent = unitLabel;
+  document.getElementById("calc-unit-display").textContent = unitLabel;
+  
+  const hintText = selectedUnit === "ሜትር" ? "በአንድ ቀጣሪ ያለ ሜትር" : 
+                   selectedUnit === "ኪግ" ? "በአንድ ቀጣሪ ያለ ኪግ" : 
+                   "በአንድ ቀጣሪ ያለ ቀንድ";
+  document.getElementById("hint-per-unit").textContent = hintText;
+  
+  const labelPerUnit = selectedUnit === "ሜትር" ? "በሮል (m)" : 
+                       selectedUnit === "ኪግ" ? "በሮል (ኪግ)" : 
+                       "በሮል (ቀንድ)";
+  document.getElementById("label-per-unit").textContent = labelPerUnit;
+}
+
+// ============ BACKUP / RESTORE ============
+function exportBackup() {
+  const data = {
+    version: 1,
+    exportDate: new Date().toISOString(),
+    distributions,
+    payments,
+    materials,
+    incoming
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement("a");
+  const d    = new Date();
+  a.href     = url;
+  a.download = `textile-backup-${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast("📁 Backup ተወርዷል");
+}
+
+function importBackup(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (!data.distributions || !data.payments) throw new Error("Invalid format");
+      if (!confirm(`${data.distributions.length} ስርጭቶች፣ ${data.payments.length} ክፍያዎች እና ${(data.materials || []).length} ጨርቆች ይጫናሉ። ይቀጥሉ?`)) return;
+      distributions = data.distributions;
+      payments      = data.payments;
+      materials     = data.materials || JSON.parse(JSON.stringify(DEFAULT_MATERIALS));
+      incoming      = data.incoming || [];
+      save();
+      saveMaterials();
+      renderDashboard();
+      renderMaterials();
+      showToast("✅ Backup ተጭኗል");
+    } catch(err) {
+      showToast("❌ ፋይሉ ትክክል አይደለም");
+    }
+    input.value = "";
+  };
+  reader.readAsText(file);
+}
+
+function clearAllData() {
+  if (!confirm("ሁሉንም ዳታ ይሰርዙ? ይህ ሊመለስ አይችልም!")) return;
+  if (!confirm("እርግጠኛ ነዎት?")) return;
+  distributions = [];
+  payments = [];
+  materials = JSON.parse(JSON.stringify(DEFAULT_MATERIALS));
+  incoming = [];
+  save();
+  saveMaterials();
+  renderDashboard();
+  renderMaterials();
+  showToast("🗑️ ሁሉም ዳታ ተሰርዟል");
+}
+
+// ============ HELPERS ============
+function fmt(n) {
+  n = Number(n || 0);
+  if (Math.abs(n) >= 1000000) return "ብር " + (n/1000000).toFixed(2) + "M";
+  return "ብር " + n.toLocaleString("en-US", {minimumFractionDigits:2, maximumFractionDigits:2});
+}
+function fmtFull(n) {
+  return "ብር " + Number(n||0).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+function getToday() { return new Date().toISOString().split("T")[0]; }
+
+function showToast(msg) {
+  const t = document.getElementById("toast");
+  t.textContent = msg; t.style.display = "block";
+  setTimeout(() => t.style.display = "none", 2800);
+}
+
+function setHeaderDate() {
+  const now = new Date();
+  const months = ["ጃን","ፌብ","ማርች","ኤፕ","ሜይ","ጁን","ጁላ","ኦገ","ሴፕ","ኦክ","ኖቬ","ዲሴ"];
+  document.getElementById("headerDate").textContent =
+    now.getDate() + " " + months[now.getMonth()] + " " + now.getFullYear();
+}
+
+function dismissBanner() {
+  document.getElementById("install-banner").classList.add("hidden");
+  localStorage.setItem("banner-dismissed","1");
+}
+
+// ============ TAB NAVIGATION ============
+function showTab(id, btn) {
+  document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+  document.querySelectorAll(".nav-btn").forEach(b => b.classList.remove("active"));
+  document.getElementById("tab-" + id).classList.add("active");
+  btn.classList.add("active");
+  if (id === "dashboard") renderDashboard();
+  if (id === "materials") renderMaterials();
+  if (id === "records")   { renderDistRecords(); renderPayRecords(); }
+  if (id === "members")   renderMembers();
+  if (id === "payment")   updatePayBalance();
+}
+
+function showSubTab(id, btn) {
+  document.querySelectorAll(".sub-tab").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  document.getElementById("sub-dist").style.display = id === "dist" ? "block" : "none";
+  document.getElementById("sub-pays").style.display = id === "pays" ? "block" : "none";
+}
+
+// ============ CHIPS ============
+function selectCompany(val, el) {
+  selectedCompany = val;
+  document.querySelectorAll("#company-chips-pay .chip").forEach(c => c.classList.remove("selected"));
+  el.classList.add("selected");
+}
+
+function selectMethod(val, el) {
+  selectedMethod = val;
+  document.querySelectorAll("#method-chips .chip").forEach(c => c.classList.remove("selected"));
+  el.classList.add("selected");
+  document.getElementById("p-other-method").style.display = val === "ሌላ" ? "block" : "none";
+}
+
+function selectIncUnit(val, el) {
+  selectedIncUnit = val;
+  document.querySelectorAll("#company-chips .chip").forEach(c => c.classList.remove("selected"));
+  el.classList.add("selected");
+}
+
+function selectEditIncUnit(val, el) {
+  selectedEditIncUnit = val;
+  document.querySelectorAll("#edit-inc-unit-chips .chip").forEach(c => c.classList.remove("selected"));
+  el.classList.add("selected");
+}
+
+// ============ CALCULATION ============
+function updateCalc() {
+  const rolls   = parseFloat(document.getElementById("f-rolls").value)    || 0;
+  const perRoll = parseFloat(document.getElementById("f-per-roll").value) || 0;
+  const price   = parseFloat(document.getElementById("f-price").value)    || 0;
+  const box     = document.getElementById("calc-box");
+  if (!rolls || !perRoll || !price) { box.style.display="none"; return; }
+  const totalQty = rolls * perRoll;
+  const total    = totalQty * price;
+  box.style.display = "block";
+  document.getElementById("c-rolls").textContent     = rolls + " ሮሎች";
+  document.getElementById("c-per-roll").textContent  = perRoll + " " + selectedUnit;
+  document.getElementById("c-price").textContent     = fmtFull(price);
+  document.getElementById("c-qty").textContent       = totalQty.toLocaleString("en-US",{maximumFractionDigits:2}) + " " + selectedUnit;
+  document.getElementById("c-total").textContent     = fmtFull(total);
+}
+
+// ============ BALANCE ============
+function getMemberBalance(name) {
+  const totalDist = distributions.filter(d=>d.member===name).reduce((s,d)=>s+d.totalAmount,0);
+  const totalPaid = payments.filter(p=>p.member===name).reduce((s,p)=>s+p.amount,0);
+  return { totalDist, totalPaid, outstanding: totalDist - totalPaid };
+}
+
+function updatePayBalance() {
+  const member = document.getElementById("p-member").value;
+  const amount = parseFloat(document.getElementById("p-amount").value) || 0;
+  const bal    = getMemberBalance(member);
+  document.getElementById("pb-outstanding").textContent = fmtFull(bal.outstanding);
+  document.getElementById("pb-outstanding").className   = bal.outstanding > 0 ? "red" : "green";
+  document.getElementById("pb-paying").textContent      = amount > 0 ? fmtFull(amount) : "—";
+  const remaining = bal.outstanding - amount;
+  document.getElementById("pb-remaining").textContent   = amount > 0 ? fmtFull(remaining) : "—";
+  document.getElementById("pb-remaining").className     = remaining > 0 ? "red" : (remaining < 0 ? "blue" : "green");
+}
+
+// ============ ADD RECORDS ============
+function addDistribution() {
+  const materialId = document.getElementById("f-item").value;
+  const rolls   = parseFloat(document.getElementById("f-rolls").value);
+  const perRoll = parseFloat(document.getElementById("f-per-roll").value);
+  const price   = parseFloat(document.getElementById("f-price").value);
+  
+  if (!materialId||!rolls||!perRoll||!price) { showToast("⚠️ ሁሉንም አስፈላጊ መረጃዎች ይሙሉ"); return; }
+  
+  const mat = materials.find(m => m.id == materialId);
+  const itemName = mat ? mat.name : "Unknown";
+  
+  const totalQty    = rolls * perRoll;
+  const totalAmount = totalQty * price;
+  distributions.unshift({
+    id: Date.now(),
+    date:   document.getElementById("f-date").value,
+    member: document.getElementById("f-member").value,
+    item: itemName, rolls, perRoll, price, totalQty, totalAmount,
+    unit: selectedUnit,
+    notes:  document.getElementById("f-notes").value.trim()
+  });
+  save();
+  document.getElementById("f-item").value     = "";
+  document.getElementById("f-rolls").value    = "";
+  document.getElementById("f-per-roll").value = "";
+  document.getElementById("f-price").value    = "";
+  document.getElementById("f-notes").value    = "";
+  document.getElementById("calc-box").style.display = "none";
+  showToast("✅ ስርጭት ተመዝግቧል — " + fmtFull(totalAmount));
+}
+
+function addPayment() {
+  const amount = parseFloat(document.getElementById("p-amount").value);
+  if (!amount||amount<=0) { showToast("⚠️ ትክክለኛ መጠን ያስገቡ"); return; }
+  let method = selectedMethod;
+  if (method === "ሌላ") {
+    const other = document.getElementById("p-other-method").value.trim();
+    if (!other) { showToast("⚠️ የክፍያ ዘዴ ይጻፉ"); return; }
+    method = other;
+  }
+  payments.unshift({
+    id: Date.now(),
+    date:    document.getElementById("p-date").value,
+    member:  document.getElementById("p-member").value,
+    company: selectedCompany, method, amount,
+    notes:   document.getElementById("p-notes").value.trim()
+  });
+  save();
+  document.getElementById("p-amount").value = "";
+  document.getElementById("p-notes").value  = "";
+  updatePayBalance();
+  showToast("✅ ክፍያ ተመዝግቧል — " + fmtFull(amount));
+}
+
+// ============ EDIT MODALS ============
+function startEditDist(id) {
+  const dist = distributions.find(d => d.id === id);
+  if (!dist) return;
+  
+  editingDistId = id;
+  document.getElementById("edit-dist-date").value = dist.date;
+  document.getElementById("edit-dist-member").value = dist.member;
+  document.getElementById("edit-dist-item").value = dist.item;
+  document.getElementById("edit-dist-unit").value = dist.unit || "ሜትር";
+  document.getElementById("edit-dist-rolls").value = dist.rolls;
+  document.getElementById("edit-dist-per-roll").value = dist.perRoll;
+  document.getElementById("edit-dist-price").value = dist.price;
+  document.getElementById("edit-dist-notes").value = dist.notes;
+  
+  document.getElementById("edit-dist-modal").classList.add("active");
+}
+
+function saveDistEdit() {
+  if (!editingDistId) return;
+  const dist = distributions.find(d => d.id === editingDistId);
+  if (!dist) return;
+  
+  const rolls = parseFloat(document.getElementById("edit-dist-rolls").value);
+  const perRoll = parseFloat(document.getElementById("edit-dist-per-roll").value);
+  const price = parseFloat(document.getElementById("edit-dist-price").value);
+  
+  if (!rolls || !perRoll || !price) {
+    showToast("⚠️ ትክክለኛ መረጃ ያስገቡ");
+    return;
+  }
+  
+  const totalQty = rolls * perRoll;
+  const totalAmount = totalQty * price;
+  
+  dist.date = document.getElementById("edit-dist-date").value;
+  dist.member = document.getElementById("edit-dist-member").value;
+  dist.item = document.getElementById("edit-dist-item").value;
+  dist.unit = document.getElementById("edit-dist-unit").value;
+  dist.rolls = rolls;
+  dist.perRoll = perRoll;
+  dist.price = price;
+  dist.totalQty = totalQty;
+  dist.totalAmount = totalAmount;
+  dist.notes = document.getElementById("edit-dist-notes").value;
+  
+  save();
+  renderDistRecords();
+  renderDashboard();
+  closeDistModal();
+  showToast("✅ ስርጭት ታዝቧል");
+}
+
+function closeDistModal() {
+  document.getElementById("edit-dist-modal").classList.remove("active");
+  editingDistId = null;
+}
+
+function startEditPay(id) {
+  const pay = payments.find(p => p.id === id);
+  if (!pay) return;
+  
+  editingPayId = id;
+  document.getElementById("edit-pay-date").value = pay.date;
+  document.getElementById("edit-pay-member").value = pay.member;
+  document.getElementById("edit-pay-company").value = pay.company;
+  document.getElementById("edit-pay-method").value = pay.method;
+  document.getElementById("edit-pay-amount").value = pay.amount;
+  document.getElementById("edit-pay-notes").value = pay.notes;
+  
+  document.getElementById("edit-pay-modal").classList.add("active");
+}
+
+function savePayEdit() {
+  if (!editingPayId) return;
+  const pay = payments.find(p => p.id === editingPayId);
+  if (!pay) return;
+  
+  const amount = parseFloat(document.getElementById("edit-pay-amount").value);
+  if (!amount || amount <= 0) {
+    showToast("⚠️ ትክክለኛ መጠን ያስገቡ");
+    return;
+  }
+  
+  pay.date = document.getElementById("edit-pay-date").value;
+  pay.member = document.getElementById("edit-pay-member").value;
+  pay.company = document.getElementById("edit-pay-company").value;
+  pay.method = document.getElementById("edit-pay-method").value;
+  pay.amount = amount;
+  pay.notes = document.getElementById("edit-pay-notes").value;
+  
+  save();
+  renderPayRecords();
+  renderDashboard();
+  closePayModal();
+  showToast("✅ ክፍያ ታዝቧል");
+}
+
+function closePayModal() {
+  document.getElementById("edit-pay-modal").classList.remove("active");
+  editingPayId = null;
+}
+
+function saveIncEdit() {
+  if (!editingIncId) return;
+  const inc = incoming.find(i => i.id === editingIncId);
+  if (!inc) return;
+  
+  const name = document.getElementById("edit-inc-name").value.trim();
+  const price = parseFloat(document.getElementById("edit-inc-price").value);
+  
+  if (!name || !price || price < 0) {
+    showToast("⚠️ ትክክለኛ መረጃ ያስገቡ");
+    return;
+  }
+  
+  inc.name = name;
+  inc.price = price;
+  inc.unit = selectedEditIncUnit;
+  
+  saveMaterials();
+  renderMaterials();
+  closeIncModal();
+  showToast("✅ ታዝቧል");
+}
+
+function closeIncModal() {
+  document.getElementById("edit-inc-modal").classList.remove("active");
+  editingIncId = null;
+}
+
+// ============ DELETE ============
+function deleteDist(id) {
+  if (!confirm("ይህን ስርጭት ይሰርዙ?")) return;
+  distributions = distributions.filter(d=>d.id!==id);
+  save(); renderDistRecords(); renderDashboard(); showToast("🗑️ ተሰርዟል");
+}
+
+function deletePay(id) {
+  if (!confirm("ይህን ክፍያ ይሰርዙ?")) return;
+  payments = payments.filter(p=>p.id!==id);
+  save(); renderPayRecords(); renderDashboard(); showToast("🗑️ ተሰርዟል");
+}
+
+// ============ RENDER FUNCTIONS ============
+function renderDashboard() {
+  const totalDist   = distributions.reduce((s,d)=>s+d.totalAmount,0);
+  const totalPaid   = payments.reduce((s,p)=>s+p.amount,0);
+  const outstanding = totalDist - totalPaid;
+  document.getElementById("d-total").textContent       = fmt(totalDist);
+  document.getElementById("d-paid").textContent        = fmt(totalPaid);
+  document.getElementById("d-outstanding").textContent = fmt(outstanding);
+  document.getElementById("d-count").textContent       = distributions.length;
+  updateDataStats();
+
+  const grid = document.getElementById("d-member-grid");
+  grid.innerHTML = MEMBERS.map(name => {
+    const bal    = getMemberBalance(name);
+    const c      = COLORS[name];
+    const pct    = bal.totalDist > 0 ? Math.min(100,(bal.totalPaid/bal.totalDist)*100) : 0;
+    const dCount = distributions.filter(d=>d.member===name).length;
+    return `<div class="member-bal-card" style="border-left:4px solid ${c}">
+      <div class="avatar" style="background:${c}">${name[0]}</div>
+      <div class="bal-info">
+        <div class="bal-name">${name}</div>
+        <div class="progress-bar"><div class="progress-fill" style="width:${pct}%;background:${c}"></div></div>
+        <div class="bal-sub">${pct.toFixed(0)}% ተከፍሏል · ${dCount} ስርጭት</div>
+      </div>
+      <div class="bal-amount">
+        <div class="bal-label">ቀሪ ዕዳ</div>
+        <div class="bal-val ${bal.outstanding>0?'red':'green'}">${fmt(bal.outstanding)}</div>
+      </div>
+    </div>`;
+  }).join("");
+
+  const recent = document.getElementById("d-recent");
+  const all = [
+    ...distributions.map(d=>({...d,type:"dist"})),
+    ...payments.map(p=>({...p,type:"pay"}))
+  ].sort((a,b)=>b.id-a.id).slice(0,6);
+
+  if (all.length===0) { recent.innerHTML='<div class="empty">እስካሁን ምንም እንቅስቃሴ የለም።</div>'; return; }
+  recent.innerHTML = all.map(a => a.type==="dist"
+    ? `<div class="recent-row">
+        <div class="avatar" style="background:${COLORS[a.member]};width:50px;height:50px;font-size:20px">${a.member[0]}</div>
+        <div class="recent-info">
+          <div class="recent-name">📦 ${a.member} — ${a.item}</div>
+          <div class="recent-date">${a.date} · ${a.rolls} ሮሎች · ${a.unit}</div>
+        </div>
+        <div class="recent-right">
+          <div class="red" style="font-size:17px;font-weight:800">${fmt(a.totalAmount)}</div>
+          <div style="font-size:13px;color:var(--text3)">ስርጭት</div>
+        </div>
+      </div>`
+    : `<div class="recent-row">
+        <div class="avatar" style="background:${COLORS[a.member]};width:50px;height:50px;font-size:20px">${a.member[0]}</div>
+        <div class="recent-info">
+          <div class="recent-name">💳 ${a.member} — ${a.company}</div>
+          <div class="recent-date">${a.date} · ${a.method}</div>
+        </div>
+        <div class="recent-right">
+          <div class="green" style="font-size:17px;font-weight:800">${fmt(a.amount)}</div>
+          <div style="font-size:13px;color:var(--text3)">ክፍያ</div>
+        </div>
+      </div>`
+  ).join("");
+}
+
+function renderDistRecords() {
+  const fm = document.getElementById("rd-member").value;
+  const fd = document.getElementById("rd-date").value;
+  const filtered = distributions.filter(d=>(fm==="ሁሉም"||d.member===fm)&&(!fd||d.date===fd));
+  document.getElementById("rd-count").textContent = filtered.length + " መዝገብ";
+  const list = document.getElementById("rd-list");
+  if (!filtered.length){ list.innerHTML='<div class="empty">ምንም ስርጭት አልተገኘም።</div>'; return; }
+  list.innerHTML = filtered.map(d=>`
+    <div class="txn-card">
+      <div class="txn-header">
+        <div style="display:flex;align-items:center;gap:13px;flex:1">
+          <div class="avatar" style="background:${COLORS[d.member]};width:50px;height:50px;font-size:20px">${d.member[0]}</div>
+          <div>
+            <div style="font-weight:800;color:var(--text);font-size:18px">${d.member}
+              <span class="txn-tag">${d.unit}</span>
+            </div>
+            <div style="font-size:15px;color:var(--text3)">${d.date}</div>
+          </div>
+        </div>
+        <button class="edit-btn" onclick="startEditDist(${d.id})">✏️</button>
+        <button class="delete-btn" onclick="deleteDist(${d.id})">🗑️</button>
+      </div>
+      <div style="color:var(--text2);font-size:18px;margin-bottom:13px;font-weight:600">🧵 ${d.item}</div>
+      <div class="info-grid">
+        <div class="info-box"><div class="info-lbl">ሮሎች</div><div class="info-val">${d.rolls}</div></div>
+        <div class="info-box"><div class="info-lbl">በክፍል</div><div class="info-val">${d.perRoll} ${d.unit}</div></div>
+        <div class="info-box"><div class="info-lbl">ጠቅላላ</div><div class="info-val">${d.totalQty.toLocaleString("en-US",{maximumFractionDigits:2})} ${d.unit}</div></div>
+        <div class="info-box"><div class="info-lbl">ዋጋ/${d.unit}</div><div class="info-val">${fmtFull(d.price)}</div></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:13px;padding-top:13px;border-top:1px solid var(--border)">
+        <div style="font-size:15px;color:var(--text3)">${d.rolls} × ${d.perRoll}${d.unit} × ${fmtFull(d.price)}</div>
+        <div style="font-size:20px;font-weight:900;color:var(--red)">${fmtFull(d.totalAmount)}</div>
+      </div>
+      ${d.notes?`<div style="font-size:15px;color:var(--text3);margin-top:10px">📝 ${d.notes}</div>`:""}
+    </div>`).join("");
+}
+
+function renderPayRecords() {
+  const fm = document.getElementById("rp-member").value;
+  const fd = document.getElementById("rp-date").value;
+  const filtered = payments.filter(p=>(fm==="ሁሉም"||p.member===fm)&&(!fd||p.date===fd));
+  document.getElementById("rp-count").textContent = filtered.length + " ክፍያ";
+  const list = document.getElementById("rp-list");
+  if (!filtered.length){ list.innerHTML='<div class="empty">ምንም ክፍያ አልተገኘም።</div>'; return; }
+  list.innerHTML = filtered.map(p=>`
+    <div class="pay-card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:13px">
+        <div style="display:flex;align-items:center;gap:13px;flex:1">
+          <div class="avatar" style="background:${COLORS[p.member]};width:50px;height:50px;font-size:20px">${p.member[0]}</div>
+          <div>
+            <div style="font-weight:800;font-size:18px;color:var(--text)">${p.member}</div>
+            <div style="font-size:15px;color:var(--text3)">${p.date}</div>
+          </div>
+        </div>
+        <button class="edit-btn" onclick="startEditPay(${p.id})">✏️</button>
+        <button class="delete-btn" onclick="deletePay(${p.id})">🗑️</button>
+      </div>
+      <div style="display:flex;gap:9px;flex-wrap:wrap;margin-bottom:13px">
+        <span class="pay-badge">🏢 ${p.company}</span>
+        <span class="pay-badge" style="background:#dcfce7;color:#15803d">🏦 ${p.method}</span>
+      </div>
+      <div style="font-size:25px;font-weight:900;color:var(--green)">${fmtFull(p.amount)}</div>
+      ${p.notes?`<div style="font-size:15px;color:var(--text3);margin-top:10px">📝 ${p.notes}</div>`:""}
+    </div>`).join("");
+}
+
+function renderMembers() {
+  const list = document.getElementById("m-list");
+  list.innerHTML = MEMBERS.map(name => {
+    const bal   = getMemberBalance(name);
+    const c     = COLORS[name];
+    const dists = distributions.filter(d=>d.member===name);
+    const pays  = payments.filter(p=>p.member===name);
+    const pct   = bal.totalDist>0 ? Math.min(100,(bal.totalPaid/bal.totalDist)*100) : 0;
+    const recent = [...dists.map(d=>({...d,type:"dist"})),...pays.map(p=>({...p,type:"pay"}))]
+      .sort((a,b)=>b.id-a.id).slice(0,3);
+    const recentHTML = recent.map(a => a.type==="dist"
+      ? `<div class="m-txn-row">
+          <span style="font-size:18px">📦</span>
+          <span style="color:var(--text3);font-size:15px;min-width:100px">${a.date}</span>
+          <span style="color:var(--text2);font-size:16px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${a.item}</span>
+          <span class="red" style="font-size:17px;font-weight:800;flex-shrink:0">${fmt(a.totalAmount)}</span>
+        </div>`
+      : `<div class="m-txn-row">
+          <span style="font-size:18px">💳</span>
+          <span style="color:var(--text3);font-size:15px;min-width:100px">${a.date}</span>
+          <span style="color:var(--text2);font-size:16px;flex:1">${a.company} · ${a.method}</span>
+          <span class="green" style="font-size:17px;font-weight:800;flex-shrink:0">+${fmt(a.amount)}</span>
+        </div>`
+    ).join("");
+    return `<div class="member-detail-card" style="border-top:4px solid ${c};background:var(--card);border-radius:18px;padding:20px;border:1.5px solid var(--border2);box-shadow:var(--shadow);margin-bottom:16px">
+      <div style="display:flex;gap:16px;margin-bottom:18px">
+        <div style="width:68px;height:68px;border-radius:18px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:32px;color:#fff;flex-shrink:0;background:${c};box-shadow:0 3px 12px rgba(0,0,0,0.18)">${name[0]}</div>
+        <div style="flex:1">
+          <div style="font-size:24px;font-weight:900;color:var(--text)">${name}</div>
+          <div style="margin-top:9px;height:7px;background:var(--bg3);border-radius:3px;overflow:hidden">
+            <div style="width:${pct}%;height:100%;background:${c};border-radius:3px"></div>
+          </div>
+          <div style="font-size:15px;color:var(--text3);margin-top:5px">${pct.toFixed(1)}% ተከፍሏል</div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;margin-bottom:16px">
+        <div style="background:var(--bg2);border-radius:12px;padding:14px 11px;text-align:center;border:1px solid var(--border)"><div style="font-size:14px;color:var(--text3);margin-bottom:5px;text-transform:uppercase;font-weight:700">ስርጭት</div><div style="font-size:18px;font-weight:900;color:var(--red)">${fmt(bal.totalDist)}</div></div>
+        <div style="background:var(--bg2);border-radius:12px;padding:14px 11px;text-align:center;border:1px solid var(--border)"><div style="font-size:14px;color:var(--text3);margin-bottom:5px;text-transform:uppercase;font-weight:700">ክፍያ</div><div style="font-size:18px;font-weight:900;color:var(--green)">${fmt(bal.totalPaid)}</div></div>
+        <div style="background:var(--bg2);border-radius:12px;padding:14px 11px;text-align:center;border:1px solid var(--border)"><div style="font-size:14px;color:var(--text3);margin-bottom:5px;text-transform:uppercase;font-weight:700">ቀሪ ዕዳ</div><div style="font-size:18px;font-weight:900;color:${bal.outstanding>0?'var(--red)':'var(--green)'}">${fmt(bal.outstanding)}</div></div>
+      </div>
+      <div style="font-size:15px;color:var(--text3);margin-bottom:8px">${dists.length} ስርጭቶች · ${pays.length} ክፍያዎች</div>
+      ${recentHTML}
+      ${recent.length===0?'<div style="font-size:16px;color:var(--text3);text-align:center;padding:14px">እስካሁን እንቅስቃሴ የለም</div>':""}
+    </div>`;
+  }).join("");
+}
+
+function clearDistFilter(){ document.getElementById("rd-member").value="ሁሉም"; document.getElementById("rd-date").value=""; renderDistRecords(); }
+function clearPayFilter() { document.getElementById("rp-member").value="ሁሉም"; document.getElementById("rp-date").value=""; renderPayRecords(); }
+
+// ============ INIT ============
+loadData();
+setHeaderDate();
+document.getElementById("f-date").value = getToday();
+document.getElementById("p-date").value = getToday();
+renderDashboard();
+renderMaterials();
+updateUnitLabels();
+</script>
+
+</body>
+</html>

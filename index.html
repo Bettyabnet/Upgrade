@@ -1250,14 +1250,39 @@ function updateDataStats() {
 }
 
 
-function editMaterial(id){
-  const mat=materials.find(m=>m.id===id);if(!mat)return;
-  const name=prompt("Fabric name",mat.name);if(name===null)return;
-  const clean=name.trim();if(!clean){showToast("Fabric name is required");return;}
-  const priceText=prompt("Selling price per unit (ETB)",String(mat.price));if(priceText===null)return;
-  const price=Number(priceText);if(!Number.isFinite(price)||price<0){showToast("Enter a valid price");return;}
-  mat.name=clean;mat.price=price;
-  saveMaterials();auditEvent("Product edited",clean+" · "+fmtFull(price));renderMaterials();showToast("Product updated");
+function editMaterial(id) {
+  const mat = materials.find(m => String(m.id) === String(id));
+  if (!mat) return;
+  const row = document.querySelector('[data-material-row="' + String(id) + '"]');
+  if (!row) return;
+  row.classList.add("edit-mode");
+  row.innerHTML = `
+    <div class="material-inputs">
+      <input class="form-input" id="edit-material-name-${Number(id)}" value="${escapeHTML(mat.name)}" aria-label="Fabric name">
+      <input class="form-input" id="edit-material-price-${Number(id)}" type="number" min="0" step="0.01" value="${Number(mat.price)}" aria-label="Fabric price in ETB">
+    </div>
+    <div class="material-actions">
+      <button class="btn-sm btn-edit" onclick="saveMaterialEdit(${Number(id)})">Save</button>
+      <button class="btn-sm btn-delete" onclick="renderMaterials()">Cancel</button>
+    </div>`;
+}
+function saveMaterialEdit(id) {
+  const mat = materials.find(m => String(m.id) === String(id));
+  if (!mat) return;
+  const nameEl = document.getElementById("edit-material-name-" + Number(id));
+  const priceEl = document.getElementById("edit-material-price-" + Number(id));
+  const name = nameEl ? nameEl.value.trim() : "";
+  const price = priceEl ? Number(priceEl.value) : NaN;
+  if (!name || !Number.isFinite(price) || price < 0) {
+    showToast("Enter a fabric name and a valid price");
+    return;
+  }
+  mat.name = name;
+  mat.price = price;
+  saveMaterials();
+  auditEvent("Fabric price/name updated", name + " · " + fmtFull(price));
+  renderMaterials();
+  showToast("Fabric and price updated");
 }
 
 // ============ MATERIALS MANAGEMENT ============
@@ -1376,45 +1401,47 @@ function clearAllMaterials() {
 
 function renderMaterials() {
   const list = document.getElementById("material-list");
-  
+  if (!list) return;
   const incomingSection = document.getElementById("incoming-section");
   const incomingList = document.getElementById("incoming-list");
-  
-  if (incoming.length > 0) {
-    incomingSection.style.display = "block";
-    incomingList.innerHTML = incoming.map(inc => `
-      <div class="incoming-item">
-        <div class="incoming-info">
-          <div class="incoming-name">${inc.name}</div>
-          <div class="incoming-price">ብር ${inc.price.toFixed(2)}</div>
-          <div class="incoming-unit">📏 ${inc.unit}</div>
-          <div class="incoming-date">ወስኖ: ${inc.date}</div>
+
+  if (incomingSection && incomingList) {
+    if (incoming.length > 0) {
+      incomingSection.style.display = "block";
+      incomingList.innerHTML = incoming.map(inc => `
+        <div class="incoming-item">
+          <div class="incoming-info">
+            <div class="incoming-name">${escapeHTML(inc.name)}</div>
+            <div class="incoming-price">ብር ${Number(inc.price || 0).toFixed(2)}</div>
+            <div class="incoming-unit">📏 ${escapeHTML(inc.unit || "")}</div>
+            <div class="incoming-date">ወስኖ: ${escapeHTML(inc.date || "")}</div>
+          </div>
+          <div class="incoming-actions">
+            <button class="btn-confirm" onclick="confirmIncomingMaterial(${Number(inc.id)})">✅ ገደብ</button>
+            <button class="btn-edit-incoming" onclick="startEditIncoming(${Number(inc.id)})">✏️ ቀይር</button>
+            <button class="btn-remove-incoming" onclick="removeIncomingMaterial(${Number(inc.id)})">❌ ሰርዝ</button>
+          </div>
         </div>
-        <div class="incoming-actions">
-          <button class="btn-confirm" onclick="confirmIncomingMaterial(${inc.id})">✅ ገደብ</button>
-          <button class="btn-edit-incoming" onclick="startEditIncoming(${inc.id})">✏️ ቀይር</button>
-          <button class="btn-remove-incoming" onclick="removeIncomingMaterial(${inc.id})">❌ ሰርዝ</button>
-        </div>
-      </div>
-    `).join("");
-  } else {
-    incomingSection.style.display = "none";
+      `).join("");
+    } else {
+      incomingSection.style.display = "none";
+    }
   }
-  
+
   if (materials.length === 0) {
-    list.innerHTML = '<div class="empty">ምንም ጨርቅ የለም</div>';
+    list.innerHTML = '<div class="empty">No saved fabrics yet. Add a fabric name and price above.</div>';
     return;
   }
-  
-  list.innerHTML = materials.map(mat => `
-    <div class="material-row">
+
+  list.innerHTML = '<div class="form-card-title" style="margin:16px 0 12px">Saved fabrics and prices</div>' + materials.map(mat => `
+    <div class="material-row" data-material-row="${Number(mat.id)}">
       <div class="material-info">
-        <div class="material-name">${mat.name}</div>
-        <div class="material-price">ብር ${mat.price.toFixed(2)}</div>
-        <div class="material-status available">✅ አግኝ ይቻል</div>
+        <div class="material-name">${escapeHTML(mat.name)}</div>
+        <div class="material-price">ETB ${Number(mat.price || 0).toFixed(2)}</div>
       </div>
       <div class="material-actions">
-        <button class="btn-sm btn-delete" onclick="editMaterial(${mat.id})">✏️ Edit</button><button class="btn-sm btn-delete" onclick="deleteMaterial(${mat.id})">🗑️ ሰርዝ</button>
+        <button class="btn-sm btn-edit" onclick="editMaterial(${Number(mat.id)})">✏️ Edit</button>
+        <button class="btn-sm btn-delete" onclick="deleteMaterial(${Number(mat.id)})">🗑️ Delete</button>
       </div>
     </div>
   `).join("");

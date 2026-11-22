@@ -1498,6 +1498,9 @@ function importBackup(input) {
       saveMaterials();
       renderDashboard();
       renderMaterials();
+      renderStock();
+      renderReports();
+      renderAudit();
       showToast("✅ Backup ተጭኗል");
     } catch(err) {
       showToast("❌ ፋይሉ ትክክል አይደለም");
@@ -1514,10 +1517,14 @@ function clearAllData() {
   payments = [];
   materials = JSON.parse(JSON.stringify(DEFAULT_MATERIALS));
   incoming = [];
+  stockMoves = [];
+  saveAdvancedData();
   save();
   saveMaterials();
   renderDashboard();
   renderMaterials();
+  renderStock();
+  renderReports();
   auditEvent("All data cleared","Existing data reset by user");
   showToast("🗑️ ሁሉም ዳታ ተሰርዟል");
 }
@@ -1652,8 +1659,11 @@ function addDistribution() {
   const totalAmount = totalQty * price;
   const stock = getStockFor(materialId,selectedUnit);
   if(stock.tracked && totalQty>stock.qty){showToast("Not enough stock. Available: "+stock.qty+" "+selectedUnit);return;}
+  const distributionId=Date.now();
+  const stockMoveId=Date.now()+1;
   distributions.unshift({
-    id: Date.now(),
+    id: distributionId,
+    stockMoveId: stock.tracked ? stockMoveId : null,
     date:   document.getElementById("f-date").value,
     member: document.getElementById("f-member").value,
     item: itemName, rolls, perRoll, price, totalQty, totalAmount,
@@ -1662,7 +1672,7 @@ function addDistribution() {
     notes:  document.getElementById("f-notes").value.trim()
   });
   save();
-  if(stock.tracked){stockMoves.unshift({id:Date.now()+1,materialId:Number(materialId),item:itemName,type:"out",unit:selectedUnit,qty:totalQty,unitCost:0,date:document.getElementById("f-date").value,notes:"Distribution to "+document.getElementById("f-member").value});saveAdvancedData();}
+  if(stock.tracked){stockMoves.unshift({id:stockMoveId,materialId:Number(materialId),item:itemName,type:"out",unit:selectedUnit,qty:totalQty,unitCost:0,date:document.getElementById("f-date").value,notes:"Distribution "+distributionId+" to "+document.getElementById("f-member").value});saveAdvancedData();}
   auditEvent("Distribution added",itemName+" · "+totalQty+" "+selectedUnit+" · "+fmtFull(totalAmount));
   document.getElementById("f-item").value     = "";
   document.getElementById("f-rolls").value    = "";
@@ -1742,11 +1752,25 @@ function saveDistEdit() {
   dist.totalQty = totalQty;
   dist.totalAmount = totalAmount;
   dist.notes = document.getElementById("edit-dist-notes").value;
-  
+  if(dist.stockMoveId){
+    const linked=stockMoves.find(m=>m.id===dist.stockMoveId);
+    if(linked){
+      const material=materials.find(m=>String(m.id)===String(linked.materialId));
+      const before=getStockFor(linked.materialId,linked.unit);
+      const availableExcludingOld=before.qty+Number(linked.qty);
+      if(linked.unit===dist.unit&&totalQty>availableExcludingOld){showToast("Not enough stock to apply this edit");return;}
+      linked.qty=totalQty;linked.unit=dist.unit;linked.date=dist.date;linked.item=dist.item;
+      if(material&&material.name!==dist.item){const matching=materials.find(m=>m.name===dist.item);if(matching)linked.materialId=matching.id;}
+      dist.unitCost=linked.unit===dist.unit?dist.unitCost:(getStockFor(linked.materialId,dist.unit).avgCost||0);
+      saveAdvancedData();
+    }
+  }
   save();
   auditEvent("Distribution edited",dist.item+" · "+fmtFull(dist.totalAmount));
   renderDistRecords();
   renderDashboard();
+  renderStock();
+  renderReports();
   closeDistModal();
   showToast("✅ ስርጭት ታዝቧል");
 }
@@ -1833,8 +1857,13 @@ function closeIncModal() {
 // ============ DELETE ============
 function deleteDist(id) {
   if (!confirm("ይህን ስርጭት ይሰርዙ?")) return;
+  const record=distributions.find(d=>d.id===id);
+  if(record&&record.stockMoveId){
+    const move=stockMoves.find(m=>m.id===record.stockMoveId);
+    if(move){stockMoves=stockMoves.filter(m=>m.id!==move.id);stockMoves.unshift({id:Date.now(),materialId:move.materialId,item:move.item,type:"in",unit:move.unit,qty:move.qty,unitCost:0,date:getToday(),notes:"Reversal of deleted distribution "+id});saveAdvancedData();}
+  }
   distributions = distributions.filter(d=>d.id!==id);
-  save(); auditEvent("Distribution deleted","Record "+id); renderDistRecords(); renderDashboard(); showToast("🗑️ ተሰርዟል");
+  save(); auditEvent("Distribution deleted","Record "+id+"; linked stock movement reversed"); renderDistRecords(); renderDashboard(); renderStock(); showToast("🗑️ ተሰርዟል");
 }
 
 function deletePay(id) {
@@ -2037,7 +2066,7 @@ function auditEvent(action, detail) {
 function getStockFor(materialId, unit) {
   const moves=stockMoves.filter(m=>String(m.materialId)===String(materialId)&&(!unit||m.unit===unit));
   const qty=moves.reduce((sum,m)=>sum+(m.type==="in"?Number(m.qty): -Number(m.qty)),0);
-  const ins=moves.filter(m=>m.type==="in"&&Number(m.unitCost)>=0);
+  const ins=moves.filter(m=>m.type==="in"&&Number(m.unitCost)>0);
   const costQty=ins.reduce((sum,m)=>sum+Number(m.qty),0);
   const costValue=ins.reduce((sum,m)=>sum+Number(m.qty)*Number(m.unitCost||0),0);
   const avgCost=costQty?costValue/costQty:0;

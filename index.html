@@ -499,6 +499,157 @@ width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,0.3);
 .modal-buttons button { flex: 1; padding: 16px; border: none; border-radius: 12px; font-size: 17px; font-weight: 700; cursor: pointer; }
 .modal-btn-save { background: #16a34a; color: white; }
 .modal-btn-cancel { background: #ef4444; color: white; }
+
+/* ===== SIMPLE MOBILE-FIRST REFRESH (preserves all existing IDs and workflows) ===== */
+:root {
+  --ui-bg: #f5f7fb;
+  --ui-surface: #ffffff;
+  --ui-ink: #172033;
+  --ui-muted: #687386;
+  --ui-line: #e4e9f1;
+  --ui-primary: #2457a7;
+  --ui-primary-soft: #eaf1fc;
+  --ui-green: #168451;
+  --ui-red: #c43d4b;
+  --ui-shadow: 0 3px 14px rgba(20,35,60,.06);
+}
+html { background: var(--ui-bg); }
+body {
+  max-width: 760px !important;
+  background: var(--ui-bg) !important;
+  background-image: none !important;
+  color: var(--ui-ink) !important;
+  font-size: 15px !important;
+  line-height: 1.5;
+}
+header {
+  min-height: 68px !important;
+  padding: 10px 16px !important;
+  background: var(--ui-surface) !important;
+  box-shadow: 0 1px 0 var(--ui-line) !important;
+  border-bottom: 1px solid var(--ui-line);
+}
+.logo-wrap {
+  width: 44px !important; height: 44px !important;
+  border-radius: 13px !important; font-size: 25px !important;
+  background: var(--ui-primary-soft) !important; box-shadow: none !important;
+}
+.header-title { color: var(--ui-ink) !important; font-size: 18px !important; }
+.header-sub { color: var(--ui-muted) !important; font-size: 11px !important; }
+.header-date { color: var(--ui-muted) !important; background: var(--ui-bg) !important; border: 1px solid var(--ui-line) !important; font-size: 11px !important; padding: 4px 8px !important; }
+.save-indicator { color: var(--ui-green) !important; font-size: 11px !important; }
+nav {
+  top: 68px !important;
+  background: var(--ui-surface) !important;
+  border-bottom: 1px solid var(--ui-line) !important;
+  box-shadow: 0 2px 8px rgba(20,35,60,.04) !important;
+  scrollbar-width: none;
+}
+nav::-webkit-scrollbar { display: none; }
+.nav-btn {
+  min-width: 68px !important;
+  padding: 9px 8px 8px !important;
+  font-size: 19px !important;
+  color: var(--ui-muted) !important;
+  border-bottom: 2px solid transparent !important;
+}
+.nav-btn.active {
+  color: var(--ui-primary) !important;
+  background: var(--ui-primary-soft) !important;
+  border-bottom: 2px solid var(--ui-primary) !important;
+}
+.nav-label { font-size: 10px !important; font-weight: 700 !important; }
+main { padding: 18px 14px 110px !important; }
+.section-title {
+  color: var(--ui-ink) !important;
+  font-size: 16px !important; letter-spacing: 0 !important;
+  text-transform: none !important; margin: 10px 0 12px !important;
+}
+.section-title::after { background: var(--ui-line) !important; }
+.form-card, .backup-panel, .summary-card, .member-bal-card, .txn-card, .pay-card, .material-row {
+  background: var(--ui-surface) !important;
+  border: 1px solid var(--ui-line) !important;
+  border-radius: 15px !important;
+  box-shadow: var(--ui-shadow) !important;
+}
+.form-card { padding: 16px !important; margin-bottom: 14px !important; }
+.form-card-title, .backup-title { color: var(--ui-ink) !important; font-size: 15px !important; border-color: var(--ui-line) !important; }
+label { color: #4d5a70 !important; font-size: 12px !important; letter-spacing: 0 !important; text-transform: none !important; }
+input, select, .form-input, .filter-input {
+  background: #fbfcfe !important;
+  color: var(--ui-ink) !important;
+  border: 1px solid #dce3ed !important;
+  border-radius: 10px !important;
+  padding: 12px 13px !important;
+  font-size: 15px !important;
+  min-height: 44px;
+}
+input:focus, select:focus, .form-input:focus { border-color: var(--ui-primary) !important; background: #fff !important; }
+.hint, .muted, .count-lbl, .header-sub { color: var(--ui-muted) !important; }
+.chip { background: #f5f7fb !important; border: 1px solid var(--ui-line) !important; color: #46536a !important; padding: 9px 13px !important; font-size: 13px !important; }
+.chip.selected, .sub-tab.active { background: var(--ui-primary) !important; color: #fff !important; border-color: var(--ui-primary) !important; box-shadow: none !important; }
+.btn-primary, .btn-success {
+  border-radius: 11px !important; padding: 13px 16px !important;
+  font-size: 15px !important; box-shadow: none !important;
+}
+.btn-primary { background: var(--ui-primary) !important; color: #fff !important; }
+.btn-success { background: var(--ui-green) !important; color: #fff !important; }
+.btn-sm, .btn-backup, .clear-btn { border-radius: 9px !important; font-size: 13px !important; padding: 10px 12px !important; }
+.card-row { gap: 10px !important; margin-bottom: 18px !important; }
+.summary-card { padding: 14px !important; }
+.card-icon { font-size: 23px !important; margin-bottom: 4px !important; }
+.card-label { color: var(--ui-muted) !important; font-size: 11px !important; }
+.card-value { color: var(--ui-ink) !important; font-size: 18px !important; overflow-wrap: anywhere; }
+.data-stat { background: #f7f9fc !important; border: 1px solid var(--ui-line) !important; }
+.data-stat-lbl { color: var(--ui-muted) !important; font-size: 10px !important; }
+.data-stat-val { color: var(--ui-ink) !important; font-size: 18px !important; }
+.info-box { background: #f7f9fc !important; border: 1px solid var(--ui-line) !important; }
+.info-lbl { color: var(--ui-muted) !important; }
+.info-val, .material-name, .bal-name, .recent-name, .txn-card, .pay-card { color: var(--ui-ink) !important; }
+.material-price { color: var(--ui-primary) !important; }
+.material-unit, .bal-sub, .bal-label, .recent-date { color: var(--ui-muted) !important; }
+.calc-box, .balance-box { background: #f1f5fb !important; border: 1px solid #dbe5f4 !important; color: var(--ui-ink) !important; }
+.calc-title, .balance-title { color: var(--ui-primary) !important; }
+.calc-row, .balance-row { color: #46536a !important; }
+.calc-row span:last-child, .balance-row span:last-child { color: var(--ui-ink) !important; }
+.calc-total, .balance-due { border-color: #d2ddec !important; color: var(--ui-ink) !important; }
+.sub-tab { background: #f5f7fb !important; border: 1px solid var(--ui-line) !important; color: #46536a !important; padding: 11px !important; font-size: 13px !important; }
+.txn-tag, .pay-badge { background: var(--ui-primary-soft) !important; color: var(--ui-primary) !important; border: 0 !important; }
+.empty { color: var(--ui-muted) !important; font-size: 14px !important; }
+.modal { background: #fff !important; color: var(--ui-ink) !important; border: 1px solid var(--ui-line) !important; }
+.modal-title { color: var(--ui-ink) !important; }
+#toast { background: #172033 !important; color: #fff !important; border: 0 !important; font-size: 14px !important; }
+@media (max-width: 390px) {
+  .header-title { font-size: 16px !important; }
+  .header-date { display: none; }
+  .card-row { gap: 8px !important; }
+  .summary-card { padding: 11px !important; }
+  .card-value { font-size: 16px !important; }
+  .form-grid-2 { gap: 9px !important; }
+}
+@media (min-width: 600px) {
+  main { padding-left: 22px !important; padding-right: 22px !important; }
+}
+
+
+/* Advanced inventory, reporting and history */
+.advanced-panel{background:var(--ui-surface,#fff);border:1px solid var(--ui-line,#e1e7ef);border-radius:15px;padding:16px;margin:14px 0;box-shadow:var(--ui-shadow,0 2px 12px #1c2d4410)}
+.advanced-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.advanced-stat{background:#f6f8fb;border:1px solid #e5eaf1;border-radius:12px;padding:12px;min-width:0}
+.advanced-stat small{display:block;color:#65738a;font-size:12px}.advanced-stat strong{display:block;color:#1d2939;font-size:18px;margin-top:5px;overflow-wrap:anywhere}
+.advanced-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.advanced-actions button,.advanced-button{border:0;border-radius:9px;padding:11px 13px;background:#2457c5;color:#fff;font:600 13px inherit;cursor:pointer}
+.advanced-actions .secondary{background:#eef2f8;color:#344054;border:1px solid #dce3ed}
+.advanced-actions .danger{background:#fff1f0;color:#b42318;border:1px solid #fecdca}
+.advanced-table-wrap{overflow-x:auto}
+.advanced-table{width:100%;border-collapse:collapse;font-size:13px;min-width:500px}
+.advanced-table th,.advanced-table td{padding:10px 8px;text-align:left;border-bottom:1px solid #e8edf3;color:#253247}
+.advanced-table th{color:#667085;font-weight:700;background:#f8fafc}
+.stock-low{color:#b54708;font-weight:700}.stock-ok{color:#027a48;font-weight:700}
+.advanced-muted{color:#667085;font-size:12px;line-height:1.5}
+.nav-btn{min-width:74px!important}
+@media(max-width:390px){.advanced-grid{gap:8px}.advanced-stat{padding:10px}.advanced-stat strong{font-size:16px}}
+
 </style>
 
 </head>
@@ -661,7 +812,11 @@ width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,0.3);
   <button class="nav-btn" onclick="showTab('members',this)">
     <span>👥</span><span class="nav-label">አባላት</span>
   </button>
-</nav>
+
+  <button class="nav-btn" onclick="showTab('reports',this)"><span>📈</span><span class="nav-label">Reports</span></button>
+  <button class="nav-btn" onclick="showTab('history',this)"><span>🕘</span><span class="nav-label">History</span></button>
+
+<button class="nav-btn" onclick="showTab('manual',this)"><span>📖</span><span class="nav-label">Manual</span></button></nav>
 
 <main>
 
@@ -684,6 +839,33 @@ width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,0.3);
   </div>
 
   <div class="material-list" id="material-list"></div>
+
+  <div class="advanced-panel">
+    <div class="form-card-title">📦 Stock movement</div>
+    <div class="advanced-muted">Record new stock received or stock issued. Quantities are tracked by unit. Existing products start as “not tracked” until you enter an opening balance.</div>
+    <div class="form-group"><label>Fabric / product</label><select id="stock-material" class="form-input"></select></div>
+    <div class="form-grid-2">
+      <div class="form-group"><label>Movement</label><select id="stock-type" class="form-input"><option value="in">Stock in</option><option value="out">Stock out / adjustment</option></select></div>
+      <div class="form-group"><label>Unit</label><select id="stock-unit" class="form-input"><option>ሜትር</option><option>ኪግ</option><option>ፋርዳ</option><option>ቀንድ</option></select></div>
+    </div>
+    <div class="form-grid-2">
+      <div class="form-group"><label>Quantity</label><input id="stock-qty" type="number" min="0.01" step="0.01" placeholder="e.g. 250"></div>
+      <div class="form-group"><label>Cost per unit (ETB)</label><input id="stock-cost" type="number" min="0" step="0.01" placeholder="Purchase cost"></div>
+    </div>
+    <div class="form-group"><label>Date</label><input id="stock-date" type="date"></div>
+    <div class="form-group"><label>Supplier / reference / notes</label><input id="stock-notes" type="text" placeholder="Optional details"></div>
+    <button class="btn-primary" onclick="recordStockMovement()">Save stock movement</button>
+  </div>
+  <div class="advanced-panel">
+    <div class="form-card-title">Current stock</div>
+    <div id="stock-summary" class="advanced-grid"></div>
+    <div id="stock-list" class="advanced-table-wrap" style="margin-top:12px"></div>
+  </div>
+  <div class="advanced-panel">
+    <div class="form-card-title">Recent stock movements</div>
+    <div id="stock-history-list"></div>
+  </div>
+
 </div>
 
 <!-- ========== ዳሽቦርድ ========== -->
@@ -919,6 +1101,67 @@ width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,0.3);
   </div>
 </div>
 
+
+<div id="tab-reports" class="tab">
+  <div class="section-title">📈 Business reports</div>
+  <div class="form-card">
+    <div class="form-card-title">Report period</div>
+    <div class="form-grid-2">
+      <div class="form-group"><label>From</label><input type="date" id="report-from" onchange="renderReports()"></div>
+      <div class="form-group"><label>To</label><input type="date" id="report-to" onchange="renderReports()"></div>
+    </div>
+    <button class="btn-sm btn-edit" onclick="clearReportPeriod()">All dates</button>
+  </div>
+  <div class="advanced-panel">
+    <div class="form-card-title">Sales & collections</div>
+    <div class="advanced-grid">
+      <div class="advanced-stat"><small>Sales recorded (distributions)</small><strong id="r-sales">ETB 0.00</strong></div>
+      <div class="advanced-stat"><small>Payments received</small><strong id="r-payments">ETB 0.00</strong></div>
+      <div class="advanced-stat"><small>Sales less payments (selected period)</small><strong id="r-outstanding">ETB 0.00</strong></div>
+      <div class="advanced-stat"><small>Transactions</small><strong id="r-count">0</strong></div>
+    </div>
+  </div>
+  <div class="advanced-panel">
+    <div class="form-card-title">Profit estimate</div>
+    <div class="advanced-grid">
+      <div class="advanced-stat"><small>Cost of goods sold (known costs)</small><strong id="r-cogs">ETB 0.00</strong></div>
+      <div class="advanced-stat"><small>Gross profit (known costs only)</small><strong id="r-profit">ETB 0.00</strong></div>
+    </div>
+    <p class="advanced-muted" id="r-profit-note" style="margin-top:10px">Profit is calculated only for distributions with a recorded unit cost. Add stock-in movements with purchase cost to improve accuracy. Payments are collections, not additional sales.</p>
+  </div>
+  <div class="advanced-panel">
+    <div class="form-card-title">Stock valuation</div>
+    <div class="advanced-grid">
+      <div class="advanced-stat"><small>Tracked stock units (mixed units)</small><strong id="r-stock-items">0</strong></div>
+      <div class="advanced-stat"><small>Estimated stock cost value</small><strong id="r-stock-value">ETB 0.00</strong></div>
+    </div>
+  </div>
+  <div class="advanced-panel">
+    <div class="form-card-title">Export report</div>
+    <div class="advanced-actions"><button onclick="exportReportCSV()">Download CSV report</button></div>
+  </div>
+</div>
+
+
+<div id="tab-history" class="tab">
+  <div class="section-title">🕘 Change history</div>
+  <div class="advanced-panel">
+    <div class="advanced-muted">Records of additions, edits, deletions, stock movements and backup restores on this device. This history is stored locally in this browser.</div>
+    <div class="advanced-actions"><button class="secondary" onclick="exportHistory()">Export history</button><button class="danger" onclick="clearHistory()">Clear history</button></div>
+    <div id="audit-list" style="margin-top:12px"></div>
+  </div>
+</div>
+
+<div id="tab-manual" class="tab">
+  <div class="section-title">📖 Quick user manual</div>
+  <div class="advanced-panel"><div class="form-card-title">1. Set up your fabrics</div><p class="advanced-muted">Open Fabrics. Add each fabric name and its selling price. Use Stock movement to enter an opening balance or new delivery, selecting the correct unit and recording the purchase cost per unit.</p></div>
+  <div class="advanced-panel"><div class="form-card-title">2. Record stock movements</div><p class="advanced-muted">Choose a fabric, select Stock in or Stock out, enter quantity, unit, date and (for stock received) purchase cost. Enter opening stock before recording stock-out adjustments. Stock levels are tracked separately for each unit.</p></div>
+  <div class="advanced-panel"><div class="form-card-title">3. Record distributions / sales</div><p class="advanced-muted">Open Distribution, choose date, member and fabric, enter quantity and selling price, then save. If stock tracking has been initialized for that fabric and unit, the app checks availability and deducts the quantity automatically.</p></div>
+  <div class="advanced-panel"><div class="form-card-title">4. Record payments and edit records</div><p class="advanced-muted">Use Payment to record money received. Open Records to edit or delete a distribution or payment. A distribution linked to stock cannot change its fabric or unit during editing; delete and re-enter it to keep stock correct.</p></div>
+  <div class="advanced-panel"><div class="form-card-title">5. Reports and profit</div><p class="advanced-muted">Reports shows sales, collections, outstanding balance, stock valuation and a gross-profit estimate for sales with recorded purchase costs. Older sales without cost data are excluded. Other expenses are not included in profit yet.</p></div>
+  <div class="advanced-panel"><div class="form-card-title">6. Back up your records</div><p class="advanced-muted">From Dashboard, choose Backup download regularly and keep the JSON file somewhere safe. Restore only the correct backup. Before restoring, the app downloads a safety copy of the current data. Data is stored in this browser on this device; it does not automatically sync to other devices.</p></div>
+  <div class="advanced-panel"><div class="form-card-title">7. Change history</div><p class="advanced-muted">Open History to review key changes recorded on this device. Export the history file if you need a separate copy. Clearing history does not clear sales, payments or stock.</p></div>
+</div>
 <!-- ========== አባላት ========== -->
 
 <div id="tab-members" class="tab">
@@ -967,22 +1210,32 @@ const DEFAULT_MATERIALS = [
 
 // ============ PERSISTENT STORAGE ============
 function loadData() {
-  try {
-    distributions = JSON.parse(localStorage.getItem(STORAGE_KEY_DIST) || "[]");
-    payments      = JSON.parse(localStorage.getItem(STORAGE_KEY_PAYS) || "[]");
-    materials     = JSON.parse(localStorage.getItem(STORAGE_KEY_MATS) || "[]");
-    incoming      = JSON.parse(localStorage.getItem(STORAGE_KEY_INC) || "[]");
-    
-    if (materials.length === 0) {
-      materials = JSON.parse(JSON.stringify(DEFAULT_MATERIALS));
-      saveMaterials();
+  // Read each saved collection independently. A damaged new stock/history key
+  // must never cause existing sales, payments, fabrics or incoming records
+  // to be discarded from the in-memory app.
+  function readStoredArray(key, label) {
+    try {
+      const raw = localStorage.getItem(key);
+      if (raw === null) return [];
+      const parsed = JSON.parse(raw);
+      if (!Array.isArray(parsed)) throw new Error("Stored value is not an array");
+      return parsed;
+    } catch (e) {
+      showToast("Could not read " + label + " data. Other saved records were kept. Please export a backup before continuing.");
+      return [];
     }
-  } catch(e) {
-    distributions = [];
-    payments = [];
+  }
+
+  distributions = readStoredArray(STORAGE_KEY_DIST, "sales");
+  payments = readStoredArray(STORAGE_KEY_PAYS, "payments");
+  materials = readStoredArray(STORAGE_KEY_MATS, "fabric");
+  incoming = readStoredArray(STORAGE_KEY_INC, "incoming");
+  stockMoves = readStoredArray(STORAGE_KEY_STOCK, "stock");
+  auditHistory = readStoredArray(STORAGE_KEY_AUDIT, "history");
+
+  if (materials.length === 0) {
     materials = JSON.parse(JSON.stringify(DEFAULT_MATERIALS));
-    incoming = [];
-    showToast("⚠️ ዳታ ማንበብ ተሳናል — ባዶ ጀምሯል");
+    saveMaterials();
   }
   updateMaterialSelect();
 }
@@ -1022,6 +1275,17 @@ function updateDataStats() {
   document.getElementById("stat-materials").textContent = materials.length;
 }
 
+
+function editMaterial(id){
+  const mat=materials.find(m=>m.id===id);if(!mat)return;
+  const name=prompt("Fabric name",mat.name);if(name===null)return;
+  const clean=name.trim();if(!clean){showToast("Fabric name is required");return;}
+  const priceText=prompt("Selling price per unit (ETB)",String(mat.price));if(priceText===null)return;
+  const price=Number(priceText);if(!Number.isFinite(price)||price<0){showToast("Enter a valid price");return;}
+  mat.name=clean;mat.price=price;
+  saveMaterials();auditEvent("Product edited",clean+" · "+fmtFull(price));renderMaterials();renderStock();showToast("Product updated");
+}
+
 // ============ MATERIALS MANAGEMENT ============
 function addMaterial() {
   const name = document.getElementById("m-name").value.trim();
@@ -1041,6 +1305,7 @@ function addMaterial() {
   document.getElementById("m-name").value = "";
   document.getElementById("m-price").value = "";
   saveMaterials();
+  auditEvent("Product added",name);
   renderMaterials();
   showToast("✅ ጨርቅ ታክሏል — " + name);
 }
@@ -1113,8 +1378,8 @@ function removeIncomingMaterial(id) {
 function deleteMaterial(id) {
   if (!confirm("ይህን ጨርቅ ይሰርዙ?")) return;
   materials = materials.filter(m => m.id !== id);
-  saveMaterials();
-  renderMaterials();
+  saveMaterials(); auditEvent("Product deleted","Product "+id);
+  renderMaterials(); renderStock();
   showToast("🗑️ ጨርቅ ተሰርዟል");
 }
 
@@ -1158,7 +1423,7 @@ function renderMaterials() {
         <div class="material-status available">✅ አግኝ ይቻል</div>
       </div>
       <div class="material-actions">
-        <button class="btn-sm btn-delete" onclick="deleteMaterial(${mat.id})">🗑️ ሰርዝ</button>
+        <button class="btn-sm btn-delete" onclick="editMaterial(${mat.id})">✏️ Edit</button><button class="btn-sm btn-delete" onclick="deleteMaterial(${mat.id})">🗑️ ሰርዝ</button>
       </div>
     </div>
   `).join("");
@@ -1225,7 +1490,9 @@ function exportBackup() {
     distributions,
     payments,
     materials,
-    incoming
+    incoming,
+    stockMoves,
+    auditHistory
   };
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
   const url  = URL.createObjectURL(blob);
@@ -1245,16 +1512,24 @@ function importBackup(input) {
   reader.onload = function(e) {
     try {
       const data = JSON.parse(e.target.result);
-      if (!data.distributions || !data.payments) throw new Error("Invalid format");
+      if (!Array.isArray(data.distributions) || !Array.isArray(data.payments)) throw new Error("Invalid format");
+      exportBackup(); // preserve a pre-restore copy on the device
       if (!confirm(`${data.distributions.length} ስርጭቶች፣ ${data.payments.length} ክፍያዎች እና ${(data.materials || []).length} ጨርቆች ይጫናሉ። ይቀጥሉ?`)) return;
       distributions = data.distributions;
       payments      = data.payments;
       materials     = data.materials || JSON.parse(JSON.stringify(DEFAULT_MATERIALS));
       incoming      = data.incoming || [];
+      stockMoves = Array.isArray(data.stockMoves)?data.stockMoves:[];
+      auditHistory = Array.isArray(data.auditHistory)?data.auditHistory:[];
+      auditEvent("Backup restored","Imported backup from "+(data.exportDate||"unknown date"));
+      saveAdvancedData();
       save();
       saveMaterials();
       renderDashboard();
       renderMaterials();
+      renderStock();
+      renderReports();
+      renderAudit();
       showToast("✅ Backup ተጭኗል");
     } catch(err) {
       showToast("❌ ፋይሉ ትክክል አይደለም");
@@ -1271,10 +1546,15 @@ function clearAllData() {
   payments = [];
   materials = JSON.parse(JSON.stringify(DEFAULT_MATERIALS));
   incoming = [];
+  stockMoves = [];
+  saveAdvancedData();
   save();
   saveMaterials();
   renderDashboard();
   renderMaterials();
+  renderStock();
+  renderReports();
+  auditEvent("All data cleared","Existing data reset by user");
   showToast("🗑️ ሁሉም ዳታ ተሰርዟል");
 }
 
@@ -1318,6 +1598,9 @@ function showTab(id, btn) {
   if (id === "records")   { renderDistRecords(); renderPayRecords(); }
   if (id === "members")   renderMembers();
   if (id === "payment")   updatePayBalance();
+  if (id === "materials") { renderStock(); }
+  if (id === "reports") renderReports();
+  if (id === "history") renderAudit();
 }
 
 function showSubTab(id, btn) {
@@ -1403,15 +1686,23 @@ function addDistribution() {
   
   const totalQty    = rolls * perRoll;
   const totalAmount = totalQty * price;
+  const stock = getStockFor(materialId,selectedUnit);
+  if(stock.tracked && totalQty>stock.qty){showToast("Not enough stock. Available: "+stock.qty+" "+selectedUnit);return;}
+  const distributionId=Date.now();
+  const stockMoveId=Date.now()+1;
   distributions.unshift({
-    id: Date.now(),
+    id: distributionId,
+    stockMoveId: stock.tracked ? stockMoveId : null,
     date:   document.getElementById("f-date").value,
     member: document.getElementById("f-member").value,
     item: itemName, rolls, perRoll, price, totalQty, totalAmount,
     unit: selectedUnit,
+    unitCost: stock.tracked ? stock.avgCost : 0,
     notes:  document.getElementById("f-notes").value.trim()
   });
   save();
+  if(stock.tracked){stockMoves.unshift({id:stockMoveId,materialId:Number(materialId),item:itemName,type:"out",unit:selectedUnit,qty:totalQty,unitCost:0,date:document.getElementById("f-date").value,notes:"Distribution "+distributionId+" to "+document.getElementById("f-member").value});saveAdvancedData();}
+  auditEvent("Distribution added",itemName+" · "+totalQty+" "+selectedUnit+" · "+fmtFull(totalAmount));
   document.getElementById("f-item").value     = "";
   document.getElementById("f-rolls").value    = "";
   document.getElementById("f-per-roll").value = "";
@@ -1438,6 +1729,7 @@ function addPayment() {
     notes:   document.getElementById("p-notes").value.trim()
   });
   save();
+  auditEvent("Payment added",document.getElementById("p-member").value+" · "+fmtFull(amount));
   document.getElementById("p-amount").value = "";
   document.getElementById("p-notes").value  = "";
   updatePayBalance();
@@ -1466,37 +1758,43 @@ function saveDistEdit() {
   if (!editingDistId) return;
   const dist = distributions.find(d => d.id === editingDistId);
   if (!dist) return;
-  
   const rolls = parseFloat(document.getElementById("edit-dist-rolls").value);
   const perRoll = parseFloat(document.getElementById("edit-dist-per-roll").value);
   const price = parseFloat(document.getElementById("edit-dist-price").value);
-  
-  if (!rolls || !perRoll || !price) {
-    showToast("⚠️ ትክክለኛ መረጃ ያስገቡ");
-    return;
-  }
-  
+  if (!rolls || !perRoll || !price) { showToast("⚠️ ትክክለኛ መረጃ ያስገቡ"); return; }
   const totalQty = rolls * perRoll;
   const totalAmount = totalQty * price;
-  
+  const nextItem=document.getElementById("edit-dist-item").value;
+  const nextUnit=document.getElementById("edit-dist-unit").value;
+  let linked=null;
+  if(dist.stockMoveId){
+    linked=stockMoves.find(m=>m.id===dist.stockMoveId);
+    if(linked && (nextItem!==dist.item || nextUnit!==dist.unit)){
+      showToast("This sale affects stock. To change its product or unit, delete it and enter it again so inventory stays accurate.");
+      return;
+    }
+    if(linked){
+      const before=getStockFor(linked.materialId,linked.unit);
+      if(totalQty>before.qty+Number(linked.qty)){showToast("Not enough stock to apply this edit");return;}
+    }
+  }
   dist.date = document.getElementById("edit-dist-date").value;
   dist.member = document.getElementById("edit-dist-member").value;
-  dist.item = document.getElementById("edit-dist-item").value;
-  dist.unit = document.getElementById("edit-dist-unit").value;
+  dist.item = nextItem;
+  dist.unit = nextUnit;
   dist.rolls = rolls;
   dist.perRoll = perRoll;
   dist.price = price;
   dist.totalQty = totalQty;
   dist.totalAmount = totalAmount;
   dist.notes = document.getElementById("edit-dist-notes").value;
-  
+  if(linked){linked.qty=totalQty;linked.date=dist.date;saveAdvancedData();}
   save();
-  renderDistRecords();
-  renderDashboard();
+  auditEvent("Distribution edited",dist.item+" · "+fmtFull(dist.totalAmount));
+  renderDistRecords(); renderDashboard(); renderStock(); renderReports();
   closeDistModal();
   showToast("✅ ስርጭት ታዝቧል");
 }
-
 function closeDistModal() {
   document.getElementById("edit-dist-modal").classList.remove("active");
   editingDistId = null;
@@ -1536,6 +1834,7 @@ function savePayEdit() {
   pay.notes = document.getElementById("edit-pay-notes").value;
   
   save();
+  auditEvent("Payment edited",pay.member+" · "+fmtFull(pay.amount));
   renderPayRecords();
   renderDashboard();
   closePayModal();
@@ -1578,14 +1877,19 @@ function closeIncModal() {
 // ============ DELETE ============
 function deleteDist(id) {
   if (!confirm("ይህን ስርጭት ይሰርዙ?")) return;
+  const record=distributions.find(d=>d.id===id);
+  if(record&&record.stockMoveId){
+    const move=stockMoves.find(m=>m.id===record.stockMoveId);
+    if(move){stockMoves=stockMoves.filter(m=>m.id!==move.id);stockMoves.unshift({id:Date.now(),materialId:move.materialId,item:move.item,type:"in",unit:move.unit,qty:move.qty,unitCost:0,date:getToday(),notes:"Reversal of deleted distribution "+id});saveAdvancedData();}
+  }
   distributions = distributions.filter(d=>d.id!==id);
-  save(); renderDistRecords(); renderDashboard(); showToast("🗑️ ተሰርዟል");
+  save(); auditEvent("Distribution deleted","Record "+id+"; linked stock movement reversed"); renderDistRecords(); renderDashboard(); renderStock(); showToast("🗑️ ተሰርዟል");
 }
 
 function deletePay(id) {
   if (!confirm("ይህን ክፍያ ይሰርዙ?")) return;
   payments = payments.filter(p=>p.id!==id);
-  save(); renderPayRecords(); renderDashboard(); showToast("🗑️ ተሰርዟል");
+  save(); auditEvent("Payment deleted","Record "+id); renderPayRecords(); renderDashboard(); showToast("🗑️ ተሰርዟል");
 }
 
 // ============ RENDER FUNCTIONS ============
@@ -1768,6 +2072,112 @@ function renderMembers() {
 function clearDistFilter(){ document.getElementById("rd-member").value="ሁሉም"; document.getElementById("rd-date").value=""; renderDistRecords(); }
 function clearPayFilter() { document.getElementById("rp-member").value="ሁሉም"; document.getElementById("rp-date").value=""; renderPayRecords(); }
 
+
+// ============ ADVANCED TEXTILE MANAGEMENT ============
+const STORAGE_KEY_STOCK = "tt_stock_moves_am";
+const STORAGE_KEY_AUDIT = "tt_audit_am";
+let stockMoves = [];
+let auditHistory = [];
+function auditEvent(action, detail) {
+  auditHistory.unshift({id:Date.now()+Math.random(),date:new Date().toISOString(),action,detail:String(detail||"")});
+  if (auditHistory.length>1000) auditHistory=auditHistory.slice(0,1000);
+  try { localStorage.setItem(STORAGE_KEY_AUDIT,JSON.stringify(auditHistory)); } catch(e) {}
+}
+function getStockFor(materialId, unit) {
+  const moves=stockMoves.filter(m=>String(m.materialId)===String(materialId)&&(!unit||m.unit===unit));
+  const qty=moves.reduce((sum,m)=>sum+(m.type==="in"?Number(m.qty): -Number(m.qty)),0);
+  const ins=moves.filter(m=>m.type==="in"&&Number(m.unitCost)>0);
+  const costQty=ins.reduce((sum,m)=>sum+Number(m.qty),0);
+  const costValue=ins.reduce((sum,m)=>sum+Number(m.qty)*Number(m.unitCost||0),0);
+  const avgCost=costQty?costValue/costQty:0;
+  return {qty,avgCost,tracked:moves.length>0,unit};
+}
+function populateStockSelect() {
+  const el=document.getElementById("stock-material"); if(!el)return;
+  const old=el.value;
+  el.innerHTML=materials.map(m=>'<option value="'+String(m.id)+'">'+escapeHTML(m.name)+'</option>').join("");
+  if(old&&materials.some(m=>String(m.id)===old))el.value=old;
+}
+function escapeHTML(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+function recordStockMovement(){
+  const materialId=document.getElementById("stock-material").value;
+  const mat=materials.find(m=>String(m.id)===String(materialId));
+  const type=document.getElementById("stock-type").value;
+  const unit=document.getElementById("stock-unit").value;
+  const qty=Number(document.getElementById("stock-qty").value);
+  const unitCost=Number(document.getElementById("stock-cost").value||0);
+  const date=document.getElementById("stock-date").value||getToday();
+  const notes=document.getElementById("stock-notes").value.trim();
+  if(!mat||!Number.isFinite(qty)||qty<=0){showToast("Enter a product and a quantity greater than zero");return;}
+  const current=getStockFor(materialId,unit);
+  if(type==="out"&&!current.tracked){showToast("Enter an opening stock-in movement before issuing stock");return;}
+  if(type==="out"&&qty>current.qty){showToast("Not enough tracked stock for this movement");return;}
+  if(type==="in"&&unitCost<0){showToast("Cost cannot be negative");return;}
+  stockMoves.unshift({id:Date.now(),materialId:Number(materialId),item:mat.name,type,unit,qty,unitCost:type==="in"?unitCost:0,date,notes});
+  saveAdvancedData();
+  auditEvent(type==="in"?"Stock received":"Stock issued",mat.name+" · "+qty+" "+unit);
+  document.getElementById("stock-qty").value="";
+  document.getElementById("stock-cost").value="";
+  document.getElementById("stock-notes").value="";
+  renderStock();renderReports();showToast("Stock movement saved");
+}
+function saveAdvancedData(){
+  try{localStorage.setItem(STORAGE_KEY_STOCK,JSON.stringify(stockMoves));localStorage.setItem(STORAGE_KEY_AUDIT,JSON.stringify(auditHistory));}
+  catch(e){showToast("Could not save advanced records. Export a backup and free device storage.");}
+  updateDataStats();
+}
+function renderStock(){
+  populateStockSelect();
+  const rows=materials.map(m=>{
+    const units=[...new Set(stockMoves.filter(x=>String(x.materialId)===String(m.id)).map(x=>x.unit))];
+    if(!units.length)return '<tr><td>'+escapeHTML(m.name)+'</td><td colspan="3" class="advanced-muted">Not tracked yet — enter an opening stock movement</td></tr>';
+    return units.map(u=>{const st=getStockFor(m.id,u);return '<tr><td>'+escapeHTML(m.name)+'</td><td>'+st.qty.toLocaleString("en-US",{maximumFractionDigits:2})+' '+escapeHTML(u)+'</td><td>'+fmtFull(st.avgCost)+'</td><td class="'+(st.qty<=0?'stock-low':'stock-ok')+'">'+(st.qty<=0?'Out of stock':'Tracked')+'</td></tr>';}).join("");
+  }).join("");
+  const tracked=materials.filter(m=>stockMoves.some(x=>String(x.materialId)===String(m.id))).length;
+  document.getElementById("stock-summary").innerHTML='<div class="advanced-stat"><small>Products</small><strong>'+materials.length+'</strong></div><div class="advanced-stat"><small>Products with stock records</small><strong>'+tracked+'</strong></div>';
+  document.getElementById("stock-list").innerHTML='<table class="advanced-table"><thead><tr><th>Product</th><th>On hand</th><th>Average cost / unit</th><th>Status</th></tr></thead><tbody>'+(rows||'<tr><td colspan="4">No products</td></tr>')+'</tbody></table>';
+  const recent=stockMoves.slice(0,15);
+  document.getElementById("stock-history-list").innerHTML=recent.length?recent.map(m=>'<div class="recent-row"><div class="recent-info"><div class="recent-name">'+escapeHTML(m.item)+' · '+(m.type==="in"?"Stock in":"Stock out")+'</div><div class="recent-date">'+escapeHTML(m.date)+' · '+m.qty+' '+escapeHTML(m.unit)+(m.notes?' · '+escapeHTML(m.notes):'')+'</div></div><strong>'+ (m.type==="in"?"+":"−")+m.qty+'</strong></div>').join(""):'<div class="empty">No stock movements recorded yet.</div>';
+}
+function periodFilter(rows){const from=document.getElementById("report-from")?.value||"",to=document.getElementById("report-to")?.value||"";return rows.filter(x=>(!from||x.date>=from)&&(!to||x.date<=to));}
+function renderReports(){
+  const ds=periodFilter(distributions),ps=periodFilter(payments);
+  const sales=ds.reduce((a,d)=>a+Number(d.totalAmount||0),0),paid=ps.reduce((a,p)=>a+Number(p.amount||0),0);
+  const known=ds.filter(d=>Number(d.unitCost)>0);
+  const cogs=known.reduce((a,d)=>a+Number(d.totalQty||0)*Number(d.unitCost||0),0);
+  const revenueKnown=known.reduce((a,d)=>a+Number(d.totalAmount||0),0);
+  const profit=revenueKnown-cogs;
+  document.getElementById("r-sales").textContent=fmtFull(sales);
+  document.getElementById("r-payments").textContent=fmtFull(paid);
+  document.getElementById("r-outstanding").textContent=fmtFull(sales-paid);
+  document.getElementById("r-count").textContent=ds.length+" sales · "+ps.length+" payments";
+  document.getElementById("r-cogs").textContent=fmtFull(cogs);
+  document.getElementById("r-profit").textContent=fmtFull(profit);
+  document.getElementById("r-profit-note").textContent=known.length+" of "+ds.length+" distributions have saved cost data. Profit is shown only for those known-cost sales; historical sales without cost are excluded. Payments are collections, not additional sales. Other expenses are not included.";
+  let units=0,value=0;
+  materials.forEach(m=>{const us=[...new Set(stockMoves.filter(x=>String(x.materialId)===String(m.id)).map(x=>x.unit))];us.forEach(u=>{const st=getStockFor(m.id,u);if(st.tracked){units++;value+=Math.max(0,st.qty)*st.avgCost;}});});
+  document.getElementById("r-stock-items").textContent=units+" product/unit balances";
+  document.getElementById("r-stock-value").textContent=fmtFull(value);
+}
+function clearReportPeriod(){document.getElementById("report-from").value="";document.getElementById("report-to").value="";renderReports();}
+function exportReportCSV(){
+  const rows=[["Type","Date","Customer/member","Item/company","Quantity","Unit","Amount ETB","Unit cost ETB","Notes"]];
+  periodFilter(distributions).forEach(d=>rows.push(["Sale",d.date,d.member,d.item,d.totalQty,d.unit,d.totalAmount,d.unitCost||"",d.notes||""]));
+  periodFilter(payments).forEach(p=>rows.push(["Payment",p.date,p.member,p.company,"","",""+p.amount,"",p.notes||""]));
+  const csv=rows.map(r=>r.map(v=>'"'+String(v??"").replace(/"/g,'""')+'"').join(",")).join("\n");
+  downloadText(csv,"textile-report.csv","text/csv;charset=utf-8");
+}
+function downloadText(content,name,type){
+  const blob=new Blob([content],{type}),url=URL.createObjectURL(blob),a=document.createElement("a");
+  a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+function renderAudit(){
+  const el=document.getElementById("audit-list");if(!el)return;
+  el.innerHTML=auditHistory.length?auditHistory.slice(0,200).map(a=>'<div class="recent-row"><div class="recent-info"><div class="recent-name">'+escapeHTML(a.action)+'</div><div class="recent-date">'+escapeHTML(new Date(a.date).toLocaleString())+' · '+escapeHTML(a.detail)+'</div></div></div>').join(""):'<div class="empty">No change history yet.</div>';
+}
+function exportHistory(){downloadText(JSON.stringify(auditHistory,null,2),"textile-history.json","application/json");}
+function clearHistory(){if(!confirm("Clear the local change history? This will not delete sales, payments or stock."))return;auditHistory=[];saveAdvancedData();renderAudit();showToast("History cleared");}
+
 // ============ INIT ============
 loadData();
 setHeaderDate();
@@ -1775,6 +2185,10 @@ document.getElementById("f-date").value = getToday();
 document.getElementById("p-date").value = getToday();
 renderDashboard();
 renderMaterials();
+renderStock();
+renderReports();
+renderAudit();
+if(document.getElementById("stock-date"))document.getElementById("stock-date").value=getToday();
 updateUnitLabels();
 </script>
 

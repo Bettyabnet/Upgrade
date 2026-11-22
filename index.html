@@ -1117,7 +1117,7 @@ input:focus, select:focus, .form-input:focus { border-color: var(--ui-primary) !
     <div class="advanced-grid">
       <div class="advanced-stat"><small>Sales recorded (distributions)</small><strong id="r-sales">ETB 0.00</strong></div>
       <div class="advanced-stat"><small>Payments received</small><strong id="r-payments">ETB 0.00</strong></div>
-      <div class="advanced-stat"><small>Outstanding balance</small><strong id="r-outstanding">ETB 0.00</strong></div>
+      <div class="advanced-stat"><small>Sales less payments (selected period)</small><strong id="r-outstanding">ETB 0.00</strong></div>
       <div class="advanced-stat"><small>Transactions</small><strong id="r-count">0</strong></div>
     </div>
   </div>
@@ -1210,25 +1210,32 @@ const DEFAULT_MATERIALS = [
 
 // ============ PERSISTENT STORAGE ============
 function loadData() {
-  try {
-    distributions = JSON.parse(localStorage.getItem(STORAGE_KEY_DIST) || "[]");
-    payments      = JSON.parse(localStorage.getItem(STORAGE_KEY_PAYS) || "[]");
-    materials     = JSON.parse(localStorage.getItem(STORAGE_KEY_MATS) || "[]");
-    incoming      = JSON.parse(localStorage.getItem(STORAGE_KEY_INC) || "[]");
-    stockMoves = JSON.parse(localStorage.getItem(STORAGE_KEY_STOCK) || "[]");
-    auditHistory = JSON.parse(localStorage.getItem(STORAGE_KEY_AUDIT) || "[]");
-    
-    if (materials.length === 0) {
-      materials = JSON.parse(JSON.stringify(DEFAULT_MATERIALS));
-      saveMaterials();
+  // Read each saved collection independently. A damaged new stock/history key
+  // must never cause existing sales, payments, fabrics or incoming records
+  // to be discarded from the in-memory app.
+  function readStoredArray(key, label) {
+    try {
+      const raw = localStorage.getItem(key);
+      if (raw === null) return [];
+      const parsed = JSON.parse(raw);
+      if (!Array.isArray(parsed)) throw new Error("Stored value is not an array");
+      return parsed;
+    } catch (e) {
+      showToast("Could not read " + label + " data. Other saved records were kept. Please export a backup before continuing.");
+      return [];
     }
-  } catch(e) {
-    distributions = [];
-    payments = [];
+  }
+
+  distributions = readStoredArray(STORAGE_KEY_DIST, "sales");
+  payments = readStoredArray(STORAGE_KEY_PAYS, "payments");
+  materials = readStoredArray(STORAGE_KEY_MATS, "fabric");
+  incoming = readStoredArray(STORAGE_KEY_INC, "incoming");
+  stockMoves = readStoredArray(STORAGE_KEY_STOCK, "stock");
+  auditHistory = readStoredArray(STORAGE_KEY_AUDIT, "history");
+
+  if (materials.length === 0) {
     materials = JSON.parse(JSON.stringify(DEFAULT_MATERIALS));
-    incoming = [];
-    stockMoves = []; auditHistory = [];
-    showToast("⚠️ ዳታ ማንበብ ተሳናል — ባዶ ጀምሯል");
+    saveMaterials();
   }
   updateMaterialSelect();
 }

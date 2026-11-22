@@ -816,7 +816,7 @@ input:focus, select:focus, .form-input:focus { border-color: var(--ui-primary) !
   <button class="nav-btn" onclick="showTab('reports',this)"><span>📈</span><span class="nav-label">Reports</span></button>
   <button class="nav-btn" onclick="showTab('history',this)"><span>🕘</span><span class="nav-label">History</span></button>
 
-</nav>
+<button class="nav-btn" onclick="showTab('manual',this)"><span>📖</span><span class="nav-label">Manual</span></button></nav>
 
 <main>
 
@@ -1152,6 +1152,16 @@ input:focus, select:focus, .form-input:focus { border-color: var(--ui-primary) !
   </div>
 </div>
 
+<div id="tab-manual" class="tab">
+  <div class="section-title">📖 Quick user manual</div>
+  <div class="advanced-panel"><div class="form-card-title">1. Set up your fabrics</div><p class="advanced-muted">Open Fabrics. Add each fabric name and its selling price. Use Stock movement to enter an opening balance or new delivery, selecting the correct unit and recording the purchase cost per unit.</p></div>
+  <div class="advanced-panel"><div class="form-card-title">2. Record stock movements</div><p class="advanced-muted">Choose a fabric, select Stock in or Stock out, enter quantity, unit, date and (for stock received) purchase cost. Enter opening stock before recording stock-out adjustments. Stock levels are tracked separately for each unit.</p></div>
+  <div class="advanced-panel"><div class="form-card-title">3. Record distributions / sales</div><p class="advanced-muted">Open Distribution, choose date, member and fabric, enter quantity and selling price, then save. If stock tracking has been initialized for that fabric and unit, the app checks availability and deducts the quantity automatically.</p></div>
+  <div class="advanced-panel"><div class="form-card-title">4. Record payments and edit records</div><p class="advanced-muted">Use Payment to record money received. Open Records to edit or delete a distribution or payment. A distribution linked to stock cannot change its fabric or unit during editing; delete and re-enter it to keep stock correct.</p></div>
+  <div class="advanced-panel"><div class="form-card-title">5. Reports and profit</div><p class="advanced-muted">Reports shows sales, collections, outstanding balance, stock valuation and a gross-profit estimate for sales with recorded purchase costs. Older sales without cost data are excluded. Other expenses are not included in profit yet.</p></div>
+  <div class="advanced-panel"><div class="form-card-title">6. Back up your records</div><p class="advanced-muted">From Dashboard, choose Backup download regularly and keep the JSON file somewhere safe. Restore only the correct backup. Before restoring, the app downloads a safety copy of the current data. Data is stored in this browser on this device; it does not automatically sync to other devices.</p></div>
+  <div class="advanced-panel"><div class="form-card-title">7. Change history</div><p class="advanced-muted">Open History to review key changes recorded on this device. Export the history file if you need a separate copy. Clearing history does not clear sales, payments or stock.</p></div>
+</div>
 <!-- ========== አባላት ========== -->
 
 <div id="tab-members" class="tab">
@@ -1256,6 +1266,17 @@ function updateDataStats() {
   document.getElementById("stat-dists").textContent = distributions.length;
   document.getElementById("stat-pays").textContent  = payments.length;
   document.getElementById("stat-materials").textContent = materials.length;
+}
+
+
+function editMaterial(id){
+  const mat=materials.find(m=>m.id===id);if(!mat)return;
+  const name=prompt("Fabric name",mat.name);if(name===null)return;
+  const clean=name.trim();if(!clean){showToast("Fabric name is required");return;}
+  const priceText=prompt("Selling price per unit (ETB)",String(mat.price));if(priceText===null)return;
+  const price=Number(priceText);if(!Number.isFinite(price)||price<0){showToast("Enter a valid price");return;}
+  mat.name=clean;mat.price=price;
+  saveMaterials();auditEvent("Product edited",clean+" · "+fmtFull(price));renderMaterials();renderStock();showToast("Product updated");
 }
 
 // ============ MATERIALS MANAGEMENT ============
@@ -1395,7 +1416,7 @@ function renderMaterials() {
         <div class="material-status available">✅ አግኝ ይቻል</div>
       </div>
       <div class="material-actions">
-        <button class="btn-sm btn-delete" onclick="deleteMaterial(${mat.id})">🗑️ ሰርዝ</button>
+        <button class="btn-sm btn-delete" onclick="editMaterial(${mat.id})">✏️ Edit</button><button class="btn-sm btn-delete" onclick="deleteMaterial(${mat.id})">🗑️ ሰርዝ</button>
       </div>
     </div>
   `).join("");

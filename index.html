@@ -631,6 +631,25 @@ input:focus, select:focus, .form-input:focus { border-color: var(--ui-primary) !
   main { padding-left: 22px !important; padding-right: 22px !important; }
 }
 
+
+/* Advanced inventory, reporting and history */
+.advanced-panel{background:var(--ui-surface,#fff);border:1px solid var(--ui-line,#e1e7ef);border-radius:15px;padding:16px;margin:14px 0;box-shadow:var(--ui-shadow,0 2px 12px #1c2d4410)}
+.advanced-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.advanced-stat{background:#f6f8fb;border:1px solid #e5eaf1;border-radius:12px;padding:12px;min-width:0}
+.advanced-stat small{display:block;color:#65738a;font-size:12px}.advanced-stat strong{display:block;color:#1d2939;font-size:18px;margin-top:5px;overflow-wrap:anywhere}
+.advanced-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.advanced-actions button,.advanced-button{border:0;border-radius:9px;padding:11px 13px;background:#2457c5;color:#fff;font:600 13px inherit;cursor:pointer}
+.advanced-actions .secondary{background:#eef2f8;color:#344054;border:1px solid #dce3ed}
+.advanced-actions .danger{background:#fff1f0;color:#b42318;border:1px solid #fecdca}
+.advanced-table-wrap{overflow-x:auto}
+.advanced-table{width:100%;border-collapse:collapse;font-size:13px;min-width:500px}
+.advanced-table th,.advanced-table td{padding:10px 8px;text-align:left;border-bottom:1px solid #e8edf3;color:#253247}
+.advanced-table th{color:#667085;font-weight:700;background:#f8fafc}
+.stock-low{color:#b54708;font-weight:700}.stock-ok{color:#027a48;font-weight:700}
+.advanced-muted{color:#667085;font-size:12px;line-height:1.5}
+.nav-btn{min-width:74px!important}
+@media(max-width:390px){.advanced-grid{gap:8px}.advanced-stat{padding:10px}.advanced-stat strong{font-size:16px}}
+
 </style>
 
 </head>
@@ -793,6 +812,10 @@ input:focus, select:focus, .form-input:focus { border-color: var(--ui-primary) !
   <button class="nav-btn" onclick="showTab('members',this)">
     <span>👥</span><span class="nav-label">አባላት</span>
   </button>
+
+  <button class="nav-btn" onclick="showTab('reports',this)"><span>📈</span><span class="nav-label">Reports</span></button>
+  <button class="nav-btn" onclick="showTab('history',this)"><span>🕘</span><span class="nav-label">History</span></button>
+
 </nav>
 
 <main>
@@ -816,6 +839,33 @@ input:focus, select:focus, .form-input:focus { border-color: var(--ui-primary) !
   </div>
 
   <div class="material-list" id="material-list"></div>
+
+  <div class="advanced-panel">
+    <div class="form-card-title">📦 Stock movement</div>
+    <div class="advanced-muted">Record new stock received or stock issued. Quantities are tracked by unit. Existing products start as “not tracked” until you enter an opening balance.</div>
+    <div class="form-group"><label>Fabric / product</label><select id="stock-material" class="form-input"></select></div>
+    <div class="form-grid-2">
+      <div class="form-group"><label>Movement</label><select id="stock-type" class="form-input"><option value="in">Stock in</option><option value="out">Stock out / adjustment</option></select></div>
+      <div class="form-group"><label>Unit</label><select id="stock-unit" class="form-input"><option>ሜትር</option><option>ኪግ</option><option>ፋርዳ</option><option>ቀንድ</option></select></div>
+    </div>
+    <div class="form-grid-2">
+      <div class="form-group"><label>Quantity</label><input id="stock-qty" type="number" min="0.01" step="0.01" placeholder="e.g. 250"></div>
+      <div class="form-group"><label>Cost per unit (ETB)</label><input id="stock-cost" type="number" min="0" step="0.01" placeholder="Purchase cost"></div>
+    </div>
+    <div class="form-group"><label>Date</label><input id="stock-date" type="date"></div>
+    <div class="form-group"><label>Supplier / reference / notes</label><input id="stock-notes" type="text" placeholder="Optional details"></div>
+    <button class="btn-primary" onclick="recordStockMovement()">Save stock movement</button>
+  </div>
+  <div class="advanced-panel">
+    <div class="form-card-title">Current stock</div>
+    <div id="stock-summary" class="advanced-grid"></div>
+    <div id="stock-list" class="advanced-table-wrap" style="margin-top:12px"></div>
+  </div>
+  <div class="advanced-panel">
+    <div class="form-card-title">Recent stock movements</div>
+    <div id="stock-history-list"></div>
+  </div>
+
 </div>
 
 <!-- ========== ዳሽቦርድ ========== -->
@@ -1051,6 +1101,57 @@ input:focus, select:focus, .form-input:focus { border-color: var(--ui-primary) !
   </div>
 </div>
 
+
+<div id="tab-reports" class="tab">
+  <div class="section-title">📈 Business reports</div>
+  <div class="form-card">
+    <div class="form-card-title">Report period</div>
+    <div class="form-grid-2">
+      <div class="form-group"><label>From</label><input type="date" id="report-from" onchange="renderReports()"></div>
+      <div class="form-group"><label>To</label><input type="date" id="report-to" onchange="renderReports()"></div>
+    </div>
+    <button class="btn-sm btn-edit" onclick="clearReportPeriod()">All dates</button>
+  </div>
+  <div class="advanced-panel">
+    <div class="form-card-title">Sales & collections</div>
+    <div class="advanced-grid">
+      <div class="advanced-stat"><small>Sales recorded (distributions)</small><strong id="r-sales">ETB 0.00</strong></div>
+      <div class="advanced-stat"><small>Payments received</small><strong id="r-payments">ETB 0.00</strong></div>
+      <div class="advanced-stat"><small>Outstanding balance</small><strong id="r-outstanding">ETB 0.00</strong></div>
+      <div class="advanced-stat"><small>Transactions</small><strong id="r-count">0</strong></div>
+    </div>
+  </div>
+  <div class="advanced-panel">
+    <div class="form-card-title">Profit estimate</div>
+    <div class="advanced-grid">
+      <div class="advanced-stat"><small>Cost of goods sold (known costs)</small><strong id="r-cogs">ETB 0.00</strong></div>
+      <div class="advanced-stat"><small>Gross profit (known costs only)</small><strong id="r-profit">ETB 0.00</strong></div>
+    </div>
+    <p class="advanced-muted" id="r-profit-note" style="margin-top:10px">Profit is calculated only for distributions with a recorded unit cost. Add stock-in movements with purchase cost to improve accuracy. Payments are collections, not additional sales.</p>
+  </div>
+  <div class="advanced-panel">
+    <div class="form-card-title">Stock valuation</div>
+    <div class="advanced-grid">
+      <div class="advanced-stat"><small>Tracked stock units (mixed units)</small><strong id="r-stock-items">0</strong></div>
+      <div class="advanced-stat"><small>Estimated stock cost value</small><strong id="r-stock-value">ETB 0.00</strong></div>
+    </div>
+  </div>
+  <div class="advanced-panel">
+    <div class="form-card-title">Export report</div>
+    <div class="advanced-actions"><button onclick="exportReportCSV()">Download CSV report</button></div>
+  </div>
+</div>
+
+
+<div id="tab-history" class="tab">
+  <div class="section-title">🕘 Change history</div>
+  <div class="advanced-panel">
+    <div class="advanced-muted">Records of additions, edits, deletions, stock movements and backup restores on this device. This history is stored locally in this browser.</div>
+    <div class="advanced-actions"><button class="secondary" onclick="exportHistory()">Export history</button><button class="danger" onclick="clearHistory()">Clear history</button></div>
+    <div id="audit-list" style="margin-top:12px"></div>
+  </div>
+</div>
+
 <!-- ========== አባላት ========== -->
 
 <div id="tab-members" class="tab">
@@ -1104,6 +1205,8 @@ function loadData() {
     payments      = JSON.parse(localStorage.getItem(STORAGE_KEY_PAYS) || "[]");
     materials     = JSON.parse(localStorage.getItem(STORAGE_KEY_MATS) || "[]");
     incoming      = JSON.parse(localStorage.getItem(STORAGE_KEY_INC) || "[]");
+    stockMoves = JSON.parse(localStorage.getItem(STORAGE_KEY_STOCK) || "[]");
+    auditHistory = JSON.parse(localStorage.getItem(STORAGE_KEY_AUDIT) || "[]");
     
     if (materials.length === 0) {
       materials = JSON.parse(JSON.stringify(DEFAULT_MATERIALS));
@@ -1114,6 +1217,7 @@ function loadData() {
     payments = [];
     materials = JSON.parse(JSON.stringify(DEFAULT_MATERIALS));
     incoming = [];
+    stockMoves = []; auditHistory = [];
     showToast("⚠️ ዳታ ማንበብ ተሳናል — ባዶ ጀምሯል");
   }
   updateMaterialSelect();
@@ -1173,6 +1277,7 @@ function addMaterial() {
   document.getElementById("m-name").value = "";
   document.getElementById("m-price").value = "";
   saveMaterials();
+  auditEvent("Product added",name);
   renderMaterials();
   showToast("✅ ጨርቅ ታክሏል — " + name);
 }
@@ -1245,7 +1350,7 @@ function removeIncomingMaterial(id) {
 function deleteMaterial(id) {
   if (!confirm("ይህን ጨርቅ ይሰርዙ?")) return;
   materials = materials.filter(m => m.id !== id);
-  saveMaterials();
+  saveMaterials(); auditEvent("Product deleted","Product "+id);
   renderMaterials();
   showToast("🗑️ ጨርቅ ተሰርዟል");
 }
@@ -1357,7 +1462,9 @@ function exportBackup() {
     distributions,
     payments,
     materials,
-    incoming
+    incoming,
+    stockMoves,
+    auditHistory
   };
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
   const url  = URL.createObjectURL(blob);
@@ -1377,12 +1484,16 @@ function importBackup(input) {
   reader.onload = function(e) {
     try {
       const data = JSON.parse(e.target.result);
-      if (!data.distributions || !data.payments) throw new Error("Invalid format");
+      if (!Array.isArray(data.distributions) || !Array.isArray(data.payments)) throw new Error("Invalid format");
+      exportBackup(); // preserve a pre-restore copy on the device
       if (!confirm(`${data.distributions.length} ስርጭቶች፣ ${data.payments.length} ክፍያዎች እና ${(data.materials || []).length} ጨርቆች ይጫናሉ። ይቀጥሉ?`)) return;
       distributions = data.distributions;
       payments      = data.payments;
       materials     = data.materials || JSON.parse(JSON.stringify(DEFAULT_MATERIALS));
       incoming      = data.incoming || [];
+      stockMoves = Array.isArray(data.stockMoves)?data.stockMoves:[];
+      auditHistory = Array.isArray(data.auditHistory)?data.auditHistory:[];
+      auditEvent("Backup restored","Imported backup from "+(data.exportDate||"unknown date"));
       save();
       saveMaterials();
       renderDashboard();
@@ -1407,6 +1518,7 @@ function clearAllData() {
   saveMaterials();
   renderDashboard();
   renderMaterials();
+  auditEvent("All data cleared","Existing data reset by user");
   showToast("🗑️ ሁሉም ዳታ ተሰርዟል");
 }
 
@@ -1450,6 +1562,9 @@ function showTab(id, btn) {
   if (id === "records")   { renderDistRecords(); renderPayRecords(); }
   if (id === "members")   renderMembers();
   if (id === "payment")   updatePayBalance();
+  if (id === "materials") { renderStock(); }
+  if (id === "reports") renderReports();
+  if (id === "history") renderAudit();
 }
 
 function showSubTab(id, btn) {
@@ -1535,15 +1650,20 @@ function addDistribution() {
   
   const totalQty    = rolls * perRoll;
   const totalAmount = totalQty * price;
+  const stock = getStockFor(materialId,selectedUnit);
+  if(stock.tracked && totalQty>stock.qty){showToast("Not enough stock. Available: "+stock.qty+" "+selectedUnit);return;}
   distributions.unshift({
     id: Date.now(),
     date:   document.getElementById("f-date").value,
     member: document.getElementById("f-member").value,
     item: itemName, rolls, perRoll, price, totalQty, totalAmount,
     unit: selectedUnit,
+    unitCost: stock.tracked ? stock.avgCost : 0,
     notes:  document.getElementById("f-notes").value.trim()
   });
   save();
+  if(stock.tracked){stockMoves.unshift({id:Date.now()+1,materialId:Number(materialId),item:itemName,type:"out",unit:selectedUnit,qty:totalQty,unitCost:0,date:document.getElementById("f-date").value,notes:"Distribution to "+document.getElementById("f-member").value});saveAdvancedData();}
+  auditEvent("Distribution added",itemName+" · "+totalQty+" "+selectedUnit+" · "+fmtFull(totalAmount));
   document.getElementById("f-item").value     = "";
   document.getElementById("f-rolls").value    = "";
   document.getElementById("f-per-roll").value = "";
@@ -1570,6 +1690,7 @@ function addPayment() {
     notes:   document.getElementById("p-notes").value.trim()
   });
   save();
+  auditEvent("Payment added",document.getElementById("p-member").value+" · "+fmtFull(amount));
   document.getElementById("p-amount").value = "";
   document.getElementById("p-notes").value  = "";
   updatePayBalance();
@@ -1623,6 +1744,7 @@ function saveDistEdit() {
   dist.notes = document.getElementById("edit-dist-notes").value;
   
   save();
+  auditEvent("Distribution edited",dist.item+" · "+fmtFull(dist.totalAmount));
   renderDistRecords();
   renderDashboard();
   closeDistModal();
@@ -1668,6 +1790,7 @@ function savePayEdit() {
   pay.notes = document.getElementById("edit-pay-notes").value;
   
   save();
+  auditEvent("Payment edited",pay.member+" · "+fmtFull(pay.amount));
   renderPayRecords();
   renderDashboard();
   closePayModal();
@@ -1711,13 +1834,13 @@ function closeIncModal() {
 function deleteDist(id) {
   if (!confirm("ይህን ስርጭት ይሰርዙ?")) return;
   distributions = distributions.filter(d=>d.id!==id);
-  save(); renderDistRecords(); renderDashboard(); showToast("🗑️ ተሰርዟል");
+  save(); auditEvent("Distribution deleted","Record "+id); renderDistRecords(); renderDashboard(); showToast("🗑️ ተሰርዟል");
 }
 
 function deletePay(id) {
   if (!confirm("ይህን ክፍያ ይሰርዙ?")) return;
   payments = payments.filter(p=>p.id!==id);
-  save(); renderPayRecords(); renderDashboard(); showToast("🗑️ ተሰርዟል");
+  save(); auditEvent("Payment deleted","Record "+id); renderPayRecords(); renderDashboard(); showToast("🗑️ ተሰርዟል");
 }
 
 // ============ RENDER FUNCTIONS ============
@@ -1900,6 +2023,111 @@ function renderMembers() {
 function clearDistFilter(){ document.getElementById("rd-member").value="ሁሉም"; document.getElementById("rd-date").value=""; renderDistRecords(); }
 function clearPayFilter() { document.getElementById("rp-member").value="ሁሉም"; document.getElementById("rp-date").value=""; renderPayRecords(); }
 
+
+// ============ ADVANCED TEXTILE MANAGEMENT ============
+const STORAGE_KEY_STOCK = "tt_stock_moves_am";
+const STORAGE_KEY_AUDIT = "tt_audit_am";
+let stockMoves = [];
+let auditHistory = [];
+function auditEvent(action, detail) {
+  auditHistory.unshift({id:Date.now()+Math.random(),date:new Date().toISOString(),action,detail:String(detail||"")});
+  if (auditHistory.length>1000) auditHistory=auditHistory.slice(0,1000);
+  try { localStorage.setItem(STORAGE_KEY_AUDIT,JSON.stringify(auditHistory)); } catch(e) {}
+}
+function getStockFor(materialId, unit) {
+  const moves=stockMoves.filter(m=>String(m.materialId)===String(materialId)&&(!unit||m.unit===unit));
+  const qty=moves.reduce((sum,m)=>sum+(m.type==="in"?Number(m.qty): -Number(m.qty)),0);
+  const ins=moves.filter(m=>m.type==="in"&&Number(m.unitCost)>=0);
+  const costQty=ins.reduce((sum,m)=>sum+Number(m.qty),0);
+  const costValue=ins.reduce((sum,m)=>sum+Number(m.qty)*Number(m.unitCost||0),0);
+  const avgCost=costQty?costValue/costQty:0;
+  return {qty,avgCost,tracked:moves.length>0,unit};
+}
+function populateStockSelect() {
+  const el=document.getElementById("stock-material"); if(!el)return;
+  const old=el.value;
+  el.innerHTML=materials.map(m=>'<option value="'+String(m.id)+'">'+escapeHTML(m.name)+'</option>').join("");
+  if(old&&materials.some(m=>String(m.id)===old))el.value=old;
+}
+function escapeHTML(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+function recordStockMovement(){
+  const materialId=document.getElementById("stock-material").value;
+  const mat=materials.find(m=>String(m.id)===String(materialId));
+  const type=document.getElementById("stock-type").value;
+  const unit=document.getElementById("stock-unit").value;
+  const qty=Number(document.getElementById("stock-qty").value);
+  const unitCost=Number(document.getElementById("stock-cost").value||0);
+  const date=document.getElementById("stock-date").value||getToday();
+  const notes=document.getElementById("stock-notes").value.trim();
+  if(!mat||!Number.isFinite(qty)||qty<=0){showToast("Enter a product and a quantity greater than zero");return;}
+  const current=getStockFor(materialId,unit);
+  if(type==="out"&&current.tracked&&qty>current.qty){showToast("Not enough tracked stock for this movement");return;}
+  if(type==="in"&&unitCost<0){showToast("Cost cannot be negative");return;}
+  stockMoves.unshift({id:Date.now(),materialId:Number(materialId),item:mat.name,type,unit,qty,unitCost:type==="in"?unitCost:0,date,notes});
+  saveAdvancedData();
+  auditEvent(type==="in"?"Stock received":"Stock issued",mat.name+" · "+qty+" "+unit);
+  document.getElementById("stock-qty").value="";
+  document.getElementById("stock-cost").value="";
+  document.getElementById("stock-notes").value="";
+  renderStock();renderReports();showToast("Stock movement saved");
+}
+function saveAdvancedData(){
+  try{localStorage.setItem(STORAGE_KEY_STOCK,JSON.stringify(stockMoves));localStorage.setItem(STORAGE_KEY_AUDIT,JSON.stringify(auditHistory));}
+  catch(e){showToast("Could not save advanced records. Export a backup and free device storage.");}
+  updateDataStats();
+}
+function renderStock(){
+  populateStockSelect();
+  const rows=materials.map(m=>{
+    const units=[...new Set(stockMoves.filter(x=>String(x.materialId)===String(m.id)).map(x=>x.unit))];
+    if(!units.length)return '<tr><td>'+escapeHTML(m.name)+'</td><td colspan="3" class="advanced-muted">Not tracked yet — enter an opening stock movement</td></tr>';
+    return units.map(u=>{const st=getStockFor(m.id,u);return '<tr><td>'+escapeHTML(m.name)+'</td><td>'+st.qty.toLocaleString("en-US",{maximumFractionDigits:2})+' '+escapeHTML(u)+'</td><td>'+fmtFull(st.avgCost)+'</td><td class="'+(st.qty<=0?'stock-low':'stock-ok')+'">'+(st.qty<=0?'Out of stock':'Tracked')+'</td></tr>';}).join("");
+  }).join("");
+  const tracked=materials.filter(m=>stockMoves.some(x=>String(x.materialId)===String(m.id))).length;
+  document.getElementById("stock-summary").innerHTML='<div class="advanced-stat"><small>Products</small><strong>'+materials.length+'</strong></div><div class="advanced-stat"><small>Products with stock records</small><strong>'+tracked+'</strong></div>';
+  document.getElementById("stock-list").innerHTML='<table class="advanced-table"><thead><tr><th>Product</th><th>On hand</th><th>Average cost / unit</th><th>Status</th></tr></thead><tbody>'+(rows||'<tr><td colspan="4">No products</td></tr>')+'</tbody></table>';
+  const recent=stockMoves.slice(0,15);
+  document.getElementById("stock-history-list").innerHTML=recent.length?recent.map(m=>'<div class="recent-row"><div class="recent-info"><div class="recent-name">'+escapeHTML(m.item)+' · '+(m.type==="in"?"Stock in":"Stock out")+'</div><div class="recent-date">'+escapeHTML(m.date)+' · '+m.qty+' '+escapeHTML(m.unit)+(m.notes?' · '+escapeHTML(m.notes):'')+'</div></div><strong>'+ (m.type==="in"?"+":"−")+m.qty+'</strong></div>').join(""):'<div class="empty">No stock movements recorded yet.</div>';
+}
+function periodFilter(rows){const from=document.getElementById("report-from")?.value||"",to=document.getElementById("report-to")?.value||"";return rows.filter(x=>(!from||x.date>=from)&&(!to||x.date<=to));}
+function renderReports(){
+  const ds=periodFilter(distributions),ps=periodFilter(payments);
+  const sales=ds.reduce((a,d)=>a+Number(d.totalAmount||0),0),paid=ps.reduce((a,p)=>a+Number(p.amount||0),0);
+  const known=ds.filter(d=>Number(d.unitCost)>0);
+  const cogs=known.reduce((a,d)=>a+Number(d.totalQty||0)*Number(d.unitCost||0),0);
+  const revenueKnown=known.reduce((a,d)=>a+Number(d.totalAmount||0),0);
+  const profit=revenueKnown-cogs;
+  document.getElementById("r-sales").textContent=fmtFull(sales);
+  document.getElementById("r-payments").textContent=fmtFull(paid);
+  document.getElementById("r-outstanding").textContent=fmtFull(sales-paid);
+  document.getElementById("r-count").textContent=ds.length+" sales · "+ps.length+" payments";
+  document.getElementById("r-cogs").textContent=fmtFull(cogs);
+  document.getElementById("r-profit").textContent=fmtFull(profit);
+  document.getElementById("r-profit-note").textContent=known.length+" of "+ds.length+" distributions have saved cost data. Profit is shown only for those known-cost sales; historical sales without cost are excluded. Payments are collections, not additional sales. Other expenses are not included.";
+  let units=0,value=0;
+  materials.forEach(m=>{const us=[...new Set(stockMoves.filter(x=>String(x.materialId)===String(m.id)).map(x=>x.unit))];us.forEach(u=>{const st=getStockFor(m.id,u);if(st.tracked){units++;value+=Math.max(0,st.qty)*st.avgCost;}});});
+  document.getElementById("r-stock-items").textContent=units+" product/unit balances";
+  document.getElementById("r-stock-value").textContent=fmtFull(value);
+}
+function clearReportPeriod(){document.getElementById("report-from").value="";document.getElementById("report-to").value="";renderReports();}
+function exportReportCSV(){
+  const rows=[["Type","Date","Customer/member","Item/company","Quantity","Unit","Amount ETB","Unit cost ETB","Notes"]];
+  periodFilter(distributions).forEach(d=>rows.push(["Sale",d.date,d.member,d.item,d.totalQty,d.unit,d.totalAmount,d.unitCost||"",d.notes||""]));
+  periodFilter(payments).forEach(p=>rows.push(["Payment",p.date,p.member,p.company,"","",""+p.amount,"",p.notes||""]));
+  const csv=rows.map(r=>r.map(v=>'"'+String(v??"").replace(/"/g,'""')+'"').join(",")).join("\n");
+  downloadText(csv,"textile-report.csv","text/csv;charset=utf-8");
+}
+function downloadText(content,name,type){
+  const blob=new Blob([content],{type}),url=URL.createObjectURL(blob),a=document.createElement("a");
+  a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+function renderAudit(){
+  const el=document.getElementById("audit-list");if(!el)return;
+  el.innerHTML=auditHistory.length?auditHistory.slice(0,200).map(a=>'<div class="recent-row"><div class="recent-info"><div class="recent-name">'+escapeHTML(a.action)+'</div><div class="recent-date">'+escapeHTML(new Date(a.date).toLocaleString())+' · '+escapeHTML(a.detail)+'</div></div></div>').join(""):'<div class="empty">No change history yet.</div>';
+}
+function exportHistory(){downloadText(JSON.stringify(auditHistory,null,2),"textile-history.json","application/json");}
+function clearHistory(){if(!confirm("Clear the local change history? This will not delete sales, payments or stock."))return;auditHistory=[];saveAdvancedData();renderAudit();showToast("History cleared");}
+
 // ============ INIT ============
 loadData();
 setHeaderDate();
@@ -1907,6 +2135,10 @@ document.getElementById("f-date").value = getToday();
 document.getElementById("p-date").value = getToday();
 renderDashboard();
 renderMaterials();
+renderStock();
+renderReports();
+renderAudit();
+if(document.getElementById("stock-date"))document.getElementById("stock-date").value=getToday();
 updateUnitLabels();
 </script>
 

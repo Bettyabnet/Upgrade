@@ -1372,7 +1372,7 @@ function deleteMaterial(id) {
   if (!confirm("ይህን ጨርቅ ይሰርዙ?")) return;
   materials = materials.filter(m => m.id !== id);
   saveMaterials(); auditEvent("Product deleted","Product "+id);
-  renderMaterials();
+  renderMaterials(); renderStock();
   showToast("🗑️ ጨርቅ ተሰርዟል");
 }
 

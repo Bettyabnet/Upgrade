@@ -8,6 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="ጨርቅ">
 <meta name="theme-color" content="#1C1200">
+<link rel="manifest" href="./manifest.json">
 <title>ጨርቅ አስተዳደር</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Ethiopic:wght@400;600;700;900&display=swap" rel="stylesheet">
 <style>
@@ -2204,5 +2205,12 @@ if(document.getElementById("stock-date"))document.getElementById("stock-date").v
 updateUnitLabels();
 </script>
 
+<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./sw.js").catch(error => console.error("Service worker registration failed:", error));
+  });
+}
+</script>
 </body>
 </html>
